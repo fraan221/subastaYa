@@ -1,0 +1,25 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# Rider / IntelliJ IDEs
+.idea/
+
+# User-specific files
+*.user
+*.suo
+
+# Environment-specific settings (never commit secrets)
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+!appsettings.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
