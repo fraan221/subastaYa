@@ -2,9 +2,9 @@ namespace SubastaYa.Models.Entities;
 
 public class Usuario
 {
-    int id  {get; set;}
-    string name {get; set;}
-    string email {get; set;}
-    string password_hash {get; set;}
-    DateTime fecha_registro {get; set;}
+    public int id { get; set; }
+    public string nombre { get; set; } = string.Empty;
+    public string email { get; set; } = string.Empty;
+    public string password_hash { get; set; } = string.Empty;
+    public DateTime fecha_registro { get; set; }
 }
