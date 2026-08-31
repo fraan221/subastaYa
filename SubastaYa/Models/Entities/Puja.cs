@@ -2,9 +2,12 @@
 
 public class Puja
 {
-    public int id { get; set; }
-    public int subasta_id { get; set; }
-    public int comprador_id { get; set; }
-    public decimal monto { get; set; }
-    public DateTime fecha_puja { get; set; }
+    public int Id { get; set; }
+    public int SubastaId { get; set; }
+    public int CompradorId { get; set; }
+    public decimal Monto { get; set; }
+    public DateTime FechaPuja { get; set; }
+
+    public Subasta Subasta { get; set; } = null!;
+    public Usuario Comprador { get; set; } = null!;
 }

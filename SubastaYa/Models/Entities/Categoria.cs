@@ -2,7 +2,7 @@
 
 public class Categoria
 {
-    public int id { get; set; }
-    public string nombre { get; set; } = string.Empty;
-    public string url_icono { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    public string UrlIcono { get; set; } = string.Empty;
 }
