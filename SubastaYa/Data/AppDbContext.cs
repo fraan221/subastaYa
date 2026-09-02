@@ -106,8 +106,8 @@ public class AppDbContext : DbContext
             entity.Property(tl => tl.Tipo).HasColumnName("tipo").HasConversion<string>().HasMaxLength(50).IsRequired();
             entity.Property(tl => tl.Monto).HasColumnName("monto").HasColumnType("decimal(18,2)").IsRequired();
             entity.Property(tl => tl.Fecha).HasColumnName("fecha").IsRequired();
-            entity.Property(tl => tl.SubastaId).HasColumnName("subasta_id").IsRequired();
-            entity.HasOne(tl => tl.Billetera).WithMany().HasForeignKey(tl => tl.BilleteraId)
+            entity.Property(tl => tl.SubastaId).HasColumnName("subasta_id");
+            entity.HasOne(tl => tl.Billetera).WithMany().HasForeignKey(tl => tl.BilleteraId).IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(tl => tl.Subasta).WithMany().HasForeignKey(tl => tl.SubastaId)
                 .OnDelete(DeleteBehavior.Restrict);

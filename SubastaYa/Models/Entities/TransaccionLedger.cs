@@ -9,8 +9,8 @@ public class TransaccionLedger
     public TipoTransaccion Tipo { get; set; }
     public decimal Monto { get; set; }
     public DateTime Fecha { get; set; }
-    public int SubastaId { get; set; }
+    public int? SubastaId { get; set; }
 
     public Billetera Billetera { get; set; } = null!;
-    public Subasta Subasta { get; set; } = null!;
+    public Subasta? Subasta { get; set; } = null!;
 }
