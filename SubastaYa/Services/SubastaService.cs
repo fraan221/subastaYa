@@ -16,6 +16,42 @@ public class SubastaService : ISubastaService
     {
         _subastaRepository = subastaRepository;
     }
+    //Listado de subastas
+    public async Task<PaginacionResponse<SubastaListadoResponse>> ListarSubastasAsync(
+        int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda)
+    {
+        // 1. Normalizar parámetros de paginación
+        if (pagina < 1) pagina = 1;
+        if (tamaño < 1 || tamaño > 50) tamaño = 10;
+
+        // 2. Delegar al repositorio
+        var (items, totalCount) = await _subastaRepository.ListarSubastasAsync(
+            pagina, tamaño, estado, categoriaId, busqueda);
+
+        // 3. Mapear entidades a DTOs
+        var itemsDto = items.Select(s => new SubastaListadoResponse
+        {
+            Id = s.Id,
+            Titulo = s.Titulo,
+            UrlImagen = s.UrlImagen,
+            PrecioBase = s.PrecioBase,
+            FechaFin = s.FechaFin,
+            Estado = s.Estado.ToString(),
+            CategoriaNombre = s.Categoria.Nombre,
+            CantidadPujas = s.Pujas.Count,
+            MontoActual = s.Pujas.Any() ? s.Pujas.Max(p => p.Monto) : null
+        }).ToList();
+
+        // 4. Armar respuesta paginada
+        return new PaginacionResponse<SubastaListadoResponse>
+        {
+            Items = itemsDto,
+            PaginaActual = pagina,
+            TamañoPagina = tamaño,
+            TotalItems = totalCount,
+            TotalPaginas = (int)Math.Ceiling(totalCount / (double)tamaño)
+        };
+    }
 
     public async Task<SubastaResponse> CrearSubastaAsync(CrearSubastaRequest request)
     {
