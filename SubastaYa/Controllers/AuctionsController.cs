@@ -43,6 +43,22 @@ public class AuctionsController : ControllerBase
         return Ok(resultado);
     }
 
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(SubastaDetalleResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerSubasta(int id)
+    {
+        try
+        {
+            var resultado = await _subastaService.ObtenerSubastaAsync(id);
+            return Ok(resultado);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
+    }
+
     [HttpPost]
     [ProducesResponseType(typeof(SubastaResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

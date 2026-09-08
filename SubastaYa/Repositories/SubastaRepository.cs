@@ -68,5 +68,15 @@ public class SubastaRepository : ISubastaRepository
 
         return (items, totalCount);
     }
+
+    public async Task<Subasta?> ObtenerSubastaAsync(int id)
+    {
+        return await _context.Subastas
+            .Include(s => s.Vendedor)
+            .Include(s => s.Categoria)
+            .Include(s => s.Pujas)
+                .ThenInclude(p => p.Comprador)
+            .FirstOrDefaultAsync(s => s.Id == id);
+    }
 }
 

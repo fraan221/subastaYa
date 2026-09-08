@@ -53,6 +53,40 @@ public class SubastaService : ISubastaService
         };
     }
 
+    public async Task<SubastaDetalleResponse> ObtenerSubastaAsync(int id)
+    {
+        var subasta = await _subastaRepository.ObtenerSubastaAsync(id);
+        if (subasta is null)
+        {
+            throw new NotFoundException($"La subasta con ID {id} no existe.");
+        }
+
+        var pujaActual = subasta.Pujas
+            .OrderByDescending(p => p.Monto)
+            .ThenByDescending(p => p.FechaPuja)
+            .FirstOrDefault();
+
+        return new SubastaDetalleResponse
+        {
+            Id = subasta.Id,
+            Titulo = subasta.Titulo,
+            Descripcion = subasta.Descripcion,
+            UrlImagen = subasta.UrlImagen,
+            PrecioBase = subasta.PrecioBase,
+            IncrementoMinimo = subasta.IncrementoMinimo,
+            FechaInicio = subasta.FechaInicio,
+            FechaFin = subasta.FechaFin,
+            Estado = subasta.Estado.ToString(),
+            Version = subasta.Version,
+            VendedorNombre = subasta.Vendedor.Nombre,
+            CategoriaNombre = subasta.Categoria.Nombre,
+            CantidadPujas = subasta.Pujas.Count,
+            MontoActual = pujaActual?.Monto,
+            UltimaPujaComprador = pujaActual?.Comprador.Nombre,
+            FechaUltimaPuja = pujaActual?.FechaPuja
+        };
+    }
+
     public async Task<SubastaResponse> CrearSubastaAsync(CrearSubastaRequest request)
     {
         // 1. Validar existencia del vendedor

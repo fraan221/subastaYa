@@ -11,4 +11,5 @@ public interface ISubastaRepository
     Task GuardarCambiosAsync();
     Task<(List<Subasta> Items, int TotalCount)> ListarSubastasAsync(
         int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda);
+    Task<Subasta?> ObtenerSubastaAsync(int id);
 }
