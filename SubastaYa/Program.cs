@@ -14,6 +14,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder
 
 builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<ISubastaService, SubastaService>();
+builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
+builder.Services.AddScoped<IBilleteraService, BilleteraService>();
 
 var app = builder.Build();
 
