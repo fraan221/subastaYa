@@ -10,6 +10,9 @@ namespace SubastaYa.Services;
 
 public class PujaService : IPujaService
 {
+    private const int UmbralAntiSnipingSegundos = 60;
+    private const int ExtensionAntiSnipingMinutos = 2;
+
     private readonly IPujaRepository _pujaRepository;
 
     public PujaService(IPujaRepository pujaRepository)
@@ -138,9 +141,21 @@ public class PujaService : IPujaService
         };
         _pujaRepository.AgregarPuja(nuevaPuja);
 
+        // 9. Evaluar regla Anti-sniping y Concurrencia en Subasta
+        bool fueAntiSniping = false;
+        DateTime? nuevaFechaFin = null;
+
+        var tiempoRestante = subasta.FechaFin - ahora;
+        if (tiempoRestante.TotalSeconds <= UmbralAntiSnipingSegundos)
+        {
+            fueAntiSniping = true;
+            subasta.FechaFin = subasta.FechaFin.AddMinutes(ExtensionAntiSnipingMinutos);
+            nuevaFechaFin = subasta.FechaFin;
+        }
+
         subasta.Version++;
 
-        // 9. Persistir cambios de forma atómica
+        // 10. Persistir cambios de forma atómica
         await _pujaRepository.GuardarCambiosAsync();
 
         return new PujaResponse
@@ -149,7 +164,9 @@ public class PujaService : IPujaService
             SubastaId = subasta.Id,
             CompradorId = nuevaPuja.CompradorId,
             Monto = nuevaPuja.Monto,
-            FechaPuja = nuevaPuja.FechaPuja
+            FechaPuja = nuevaPuja.FechaPuja,
+            FueAntiSniping = fueAntiSniping,
+            NuevaFechaFin = nuevaFechaFin
         };
     }
 }

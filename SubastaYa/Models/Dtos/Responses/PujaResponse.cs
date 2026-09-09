@@ -7,4 +7,6 @@ public class PujaResponse
     public int CompradorId { get; set; }
     public decimal Monto { get; set; }
     public DateTime FechaPuja { get; set; }
+    public bool FueAntiSniping { get; set; }
+    public DateTime? NuevaFechaFin { get; set; }
 }
