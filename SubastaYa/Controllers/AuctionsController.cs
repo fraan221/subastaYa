@@ -11,10 +11,12 @@ namespace SubastaYa.Controllers;
 [Route("api/auctions")]
 public class AuctionsController : ControllerBase
 {
+    private readonly IPujaService _pujaService;
     private readonly ISubastaService _subastaService;
 
-    public AuctionsController(ISubastaService subastaService)
+    public AuctionsController(IPujaService pujaService, ISubastaService subastaService)
     {
+        _pujaService = pujaService;
         _subastaService = subastaService;
     }
 
@@ -77,6 +79,32 @@ public class AuctionsController : ControllerBase
         catch (BusinessRuleException ex)
         {
             return BadRequest(new { mensaje = ex.Message });
+        }
+    }
+
+    [HttpPost("{id}/bids")]
+    [ProducesResponseType(typeof(PujaResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CrearPuja(int id, [FromBody] CrearPujaRequest request)
+    {
+        try
+        {
+            var resultado = await _pujaService.RealizarPujaAsync(id, request);
+            return StatusCode(StatusCodes.Status201Created, resultado);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
+        catch (BusinessRuleException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
+        }
+        catch (ConcurrencyConflictException ex)
+        {
+            return Conflict(new { mensaje = ex.Message });
         }
     }
 }
