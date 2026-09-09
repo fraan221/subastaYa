@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SubastaYa.Exceptions;
 using SubastaYa.Models.Dtos.Requests;
 using SubastaYa.Models.Dtos.Responses;
@@ -19,8 +20,32 @@ public class PujaService : IPujaService
     {
         _pujaRepository = pujaRepository;
     }
+
     //Realizar puja: Logica para que se pueda realizar una competencia segura.
     public async Task<PujaResponse> RealizarPujaAsync(int subastaId, CrearPujaRequest request)
+    {
+        try
+        {
+            return await EjecutarPujaAsync(subastaId, request);
+        }
+        catch (BusinessRuleException ex)
+        {
+            await RegistrarRechazoAsync(subastaId, request, ex.Message);
+            throw;
+        }
+        catch (NotFoundException ex)
+        {
+            await RegistrarRechazoAsync(subastaId, request, ex.Message);
+            throw;
+        }
+        catch (ConcurrencyConflictException ex)
+        {
+            await RegistrarRechazoAsync(subastaId, request, ex.Message);
+            throw;
+        }
+    }
+
+    private async Task<PujaResponse> EjecutarPujaAsync(int subastaId, CrearPujaRequest request)
     {
         // 1. Validar existencia del comprador
         var existeComprador = await _pujaRepository.ExisteUsuarioAsync(request.CompradorId);
@@ -145,12 +170,32 @@ public class PujaService : IPujaService
         bool fueAntiSniping = false;
         DateTime? nuevaFechaFin = null;
 
+        var fechaFinOriginal = subasta.FechaFin;
         var tiempoRestante = subasta.FechaFin - ahora;
         if (tiempoRestante.TotalSeconds <= UmbralAntiSnipingSegundos)
         {
             fueAntiSniping = true;
             subasta.FechaFin = subasta.FechaFin.AddMinutes(ExtensionAntiSnipingMinutos);
             nuevaFechaFin = subasta.FechaFin;
+            
+            // Registro de puja nueva en tiempo critico en Subasta.
+            var auditoria = new AuditoriaLog
+            {
+                Entidad = nameof(Subasta),
+                EntidadId = subasta.Id,
+                Accion = "AntiSniping",
+                UsuarioId = request.CompradorId,
+                DetalleJson = JsonSerializer.Serialize(new
+                {
+                    CompradorId = request.CompradorId,
+                    Monto = request.Monto,
+                    FechaFinPrevia = fechaFinOriginal,
+                    ExtensionMinutos = ExtensionAntiSnipingMinutos,
+                    NuevaFechaFin = subasta.FechaFin
+                }),
+                Fecha = ahora
+            };
+            _pujaRepository.AgregarAuditoria(auditoria);
         }
 
         subasta.Version++;
@@ -168,5 +213,20 @@ public class PujaService : IPujaService
             FueAntiSniping = fueAntiSniping,
             NuevaFechaFin = nuevaFechaFin
         };
+    }
+
+    private async Task RegistrarRechazoAsync(int subastaId, CrearPujaRequest request, string motivo)
+    {
+        var auditoria = new AuditoriaLog
+        {
+            Entidad = nameof(Puja),
+            EntidadId = subastaId,
+            Accion = "PujaRechazada",
+            UsuarioId = request.CompradorId,
+            DetalleJson = JsonSerializer.Serialize(new { Motivo = motivo, Monto = request.Monto }),
+            Fecha = DateTime.UtcNow
+        };
+        _pujaRepository.AgregarAuditoria(auditoria);
+        await _pujaRepository.GuardarCambiosAsync();
     }
 }

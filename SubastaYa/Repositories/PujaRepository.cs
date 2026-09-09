@@ -43,6 +43,11 @@ public class PujaRepository : IPujaRepository
         _context.TransaccionLedgers.Add(transaccion);
     }
 
+    public void AgregarAuditoria(AuditoriaLog auditoria)
+    {
+        _context.AuditoriaLogs.Add(auditoria);
+    }
+
     public async Task GuardarCambiosAsync()
     {
         try
@@ -51,6 +56,7 @@ public class PujaRepository : IPujaRepository
         }
         catch (DbUpdateConcurrencyException)
         {
+            _context.ChangeTracker.Clear();
             throw new ConcurrencyConflictException(
                 "Conflicto de concurrencia: otro usuario modificó los datos simultáneamente. Por favor, intentá nuevamente.");
         }

@@ -9,5 +9,6 @@ public interface IPujaRepository
     Task<bool> ExisteUsuarioAsync(int usuarioId);
     void AgregarPuja(Puja puja);
     void AgregarTransaccion(TransaccionLedger transaccion);
+    void AgregarAuditoria(AuditoriaLog auditoria);
     Task GuardarCambiosAsync();
 }
