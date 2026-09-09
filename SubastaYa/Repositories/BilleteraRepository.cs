@@ -18,4 +18,19 @@ public class BilleteraRepository : IBilleteraRepository
     {
         return await _context.Billeteras.Include(b => b.Usuario).ToListAsync();
     }
+
+    public async Task<Billetera?> ObtenerPorUsuarioIdAsync(int usuarioId)
+    {
+        return await _context.Billeteras.FirstOrDefaultAsync(b => b.UsuarioId == usuarioId);
+    }
+
+    public void AgregarTransaccion(TransaccionLedger transaccion)
+    {
+        _context.Add(transaccion);
+    }
+
+    public Task GuardarCambiosAsync()
+    {
+        return _context.SaveChangesAsync();
+    }
 }
