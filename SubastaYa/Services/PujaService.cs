@@ -6,6 +6,8 @@ using SubastaYa.Models.Entities;
 using SubastaYa.Models.Enums;
 using SubastaYa.Repositories.Interfaces;
 using SubastaYa.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
+using SubastaYa.Hubs;
 
 namespace SubastaYa.Services;
 
@@ -15,10 +17,12 @@ public class PujaService : IPujaService
     private const int ExtensionAntiSnipingMinutos = 2;
 
     private readonly IPujaRepository _pujaRepository;
+    private readonly IHubContext<AuctionHub> _hubContext;
 
-    public PujaService(IPujaRepository pujaRepository)
+    public PujaService(IPujaRepository pujaRepository, IHubContext<AuctionHub> hubContext)
     {
         _pujaRepository = pujaRepository;
+        _hubContext = hubContext;
     }
 
     //Realizar puja: Logica para que se pueda realizar una competencia segura.
@@ -203,7 +207,7 @@ public class PujaService : IPujaService
         // 10. Persistir cambios de forma atómica
         await _pujaRepository.GuardarCambiosAsync();
 
-        return new PujaResponse
+        var response = new PujaResponse
         {
             PujaId = nuevaPuja.Id,
             SubastaId = subasta.Id,
@@ -213,6 +217,22 @@ public class PujaService : IPujaService
             FueAntiSniping = fueAntiSniping,
             NuevaFechaFin = nuevaFechaFin
         };
+
+        // 11. Emitir eventos en tiempo real
+        await _hubContext.Clients.Group($"auction-{subasta.Id}")
+            .SendAsync("NewBid", response);
+
+        if (fueAntiSniping)
+        {
+            await _hubContext.Clients.Group($"auction-{subasta.Id}")
+                .SendAsync("AuctionExtended", new
+                {
+                    SubastaId = subasta.Id,
+                    NuevaFechaFin = subasta.FechaFin
+                });
+        }
+
+        return response;
     }
 
     private async Task RegistrarRechazoAsync(int subastaId, CrearPujaRequest request, string motivo)
@@ -228,5 +248,13 @@ public class PujaService : IPujaService
         };
         _pujaRepository.AgregarAuditoria(auditoria);
         await _pujaRepository.GuardarCambiosAsync();
+
+        await _hubContext.Clients.Group($"auction-{subastaId}")
+            .SendAsync("BidRejected", new
+            {
+                SubastaId = subastaId,
+                CompradorId = request.CompradorId,
+                Motivo = motivo
+            });
     }
 }

@@ -4,6 +4,7 @@ using SubastaYa.Repositories;
 using SubastaYa.Repositories.Interfaces;
 using SubastaYa.Services;
 using SubastaYa.Services.Interfaces;
+using SubastaYa.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,8 @@ builder.Services.AddScoped<ISubastaService, SubastaService>();
 builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
 builder.Services.AddScoped<IBilleteraService, BilleteraService>();
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -32,4 +35,5 @@ db.Database.Migrate();
 await DbSeeder.SeederAsync(db);
 
 app.MapControllers();
+app.MapHub<AuctionHub>("/hubs/auction");
 app.Run();
