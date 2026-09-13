@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SubastaYa.Exceptions;
 using SubastaYa.Models.Dtos.Requests;
 using SubastaYa.Models.Dtos.Responses;
@@ -58,6 +59,24 @@ public class BilleteraService : IBilleteraService
         };
         
         _billeteraRepository.AgregarTransaccion(transaccion);
+        await _billeteraRepository.GuardarCambiosAsync();
+
+        var auditoria = new AuditoriaLog
+        {
+            Entidad = nameof(Billetera),
+            EntidadId = billetera.Id,
+            Accion = "DepositoManual",
+            UsuarioId = request.UsuarioId,
+            DetalleJson = JsonSerializer.Serialize(new
+            {
+                UsuarioId = request.UsuarioId,
+                Monto = request.Monto,
+                SaldoTotal = billetera.SaldoTotal,
+                SaldoDisponible = billetera.SaldoDisponible
+            }),
+            Fecha = DateTime.UtcNow
+        };
+        _billeteraRepository.AgregarAuditoria(auditoria);
         await _billeteraRepository.GuardarCambiosAsync();
 
         return new BalanceResponse
