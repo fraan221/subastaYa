@@ -5,6 +5,7 @@ using SubastaYa.Repositories.Interfaces;
 using SubastaYa.Services;
 using SubastaYa.Services.Interfaces;
 using SubastaYa.Hubs;
+using SubastaYa.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
 builder.Services.AddScoped<IBilleteraService, BilleteraService>();
 
 builder.Services.AddSignalR();
+builder.Services.AddHostedService<AuctionFinalizationWorker>();
 
 var app = builder.Build();
 
