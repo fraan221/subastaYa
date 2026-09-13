@@ -29,6 +29,11 @@ public class BilleteraRepository : IBilleteraRepository
         _context.Add(transaccion);
     }
 
+    public void AgregarAuditoria(AuditoriaLog auditoria)
+    {
+        _context.AuditoriaLogs.Add(auditoria);
+    }
+
     public Task GuardarCambiosAsync()
     {
         return _context.SaveChangesAsync();

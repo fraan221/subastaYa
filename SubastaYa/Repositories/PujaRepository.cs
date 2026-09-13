@@ -48,6 +48,11 @@ public class PujaRepository : IPujaRepository
         _context.AuditoriaLogs.Add(auditoria);
     }
 
+    public void LimpiarRastreador()
+    {
+        _context.ChangeTracker.Clear();
+    }
+
     public async Task GuardarCambiosAsync()
     {
         try

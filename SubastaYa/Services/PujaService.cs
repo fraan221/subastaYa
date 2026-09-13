@@ -217,13 +217,22 @@ public class PujaService : IPujaService
 
     private async Task RegistrarRechazoAsync(int subastaId, CrearPujaRequest request, string motivo)
     {
+        _pujaRepository.LimpiarRastreador();
+
+        var existeUsuario = await _pujaRepository.ExisteUsuarioAsync(request.CompradorId);
+        
         var auditoria = new AuditoriaLog
         {
             Entidad = nameof(Puja),
             EntidadId = subastaId,
             Accion = "PujaRechazada",
-            UsuarioId = request.CompradorId,
-            DetalleJson = JsonSerializer.Serialize(new { Motivo = motivo, Monto = request.Monto }),
+            UsuarioId = existeUsuario ? request.CompradorId : null,
+            DetalleJson = JsonSerializer.Serialize(new
+            {
+                Motivo = motivo, 
+                Monto = request.Monto,
+                CompradorIdSolicitado = request.CompradorId
+            }),
             Fecha = DateTime.UtcNow
         };
         _pujaRepository.AgregarAuditoria(auditoria);

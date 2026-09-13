@@ -10,5 +10,6 @@ public interface IPujaRepository
     void AgregarPuja(Puja puja);
     void AgregarTransaccion(TransaccionLedger transaccion);
     void AgregarAuditoria(AuditoriaLog auditoria);
+    void LimpiarRastreador();
     Task GuardarCambiosAsync();
 }
