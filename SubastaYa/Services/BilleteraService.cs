@@ -47,6 +47,7 @@ public class BilleteraService : IBilleteraService
 
         billetera.SaldoTotal += request.Monto;
         billetera.SaldoDisponible += request.Monto;
+        billetera.Version++;
 
         var transaccion = new TransaccionLedger
         {

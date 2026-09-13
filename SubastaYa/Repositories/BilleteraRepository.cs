@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SubastaYa.Data;
+using SubastaYa.Exceptions;
 using SubastaYa.Models.Entities;
 using SubastaYa.Repositories.Interfaces;
 
@@ -29,8 +30,17 @@ public class BilleteraRepository : IBilleteraRepository
         _context.Add(transaccion);
     }
 
-    public Task GuardarCambiosAsync()
+    public async Task GuardarCambiosAsync()
     {
-        return _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            _context.ChangeTracker.Clear();
+            throw new ConcurrencyConflictException(
+                "Conflicto de concurrencia: la billetera fue modificada al mismo tiempo por otra operacion. Intente de nuevo.");
+        }
     }
 }

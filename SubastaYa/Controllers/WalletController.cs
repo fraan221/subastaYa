@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SubastaYa.Exceptions;
 using SubastaYa.Models.Dtos.Requests;
 using SubastaYa.Models.Dtos.Responses;
@@ -29,6 +30,7 @@ public class WalletController : ControllerBase
     [ProducesResponseType(typeof(BalanceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Depositar([FromBody] DepositarRequest request)
     {
         try
@@ -43,6 +45,10 @@ public class WalletController : ControllerBase
         catch (BusinessRuleException ex)
         {
             return BadRequest(new { mensaje = ex.Message });
+        }
+        catch (ConcurrencyConflictException ex)
+        {
+            return Conflict(new { mensaje = ex.Message });
         }
     }
 }
