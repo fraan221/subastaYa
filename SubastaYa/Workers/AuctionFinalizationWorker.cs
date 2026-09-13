@@ -103,21 +103,26 @@ public class AuctionFinalizationWorker : BackgroundService
 
         if (billeteraComprador != null && billeteraVendedor != null)
         {
+            //Comprador
             billeteraComprador.SaldoRetenido -= pujaGanadora.Monto;
+            billeteraComprador.SaldoTotal -= pujaGanadora.Monto;
             billeteraComprador.Version++;
-
+            
+            //Vendedor
             billeteraVendedor.SaldoDisponible += pujaGanadora.Monto;
+            billeteraVendedor.SaldoTotal += pujaGanadora.Monto;
             billeteraVendedor.Version++;
-
+            
+            //Comprador
             context.TransaccionLedgers.Add(new TransaccionLedger
             {
                 BilleteraId = billeteraComprador.Id,
-                Tipo = TipoTransaccion.Liberacion,
+                Tipo = TipoTransaccion.Pago,
                 Monto = pujaGanadora.Monto,
                 Fecha = ahora,
                 SubastaId = subasta.Id
             });
-
+            //Vendedor
             context.TransaccionLedgers.Add(new TransaccionLedger
             {
                 BilleteraId = billeteraVendedor.Id,

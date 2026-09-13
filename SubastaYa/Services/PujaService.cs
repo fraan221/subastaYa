@@ -222,7 +222,7 @@ public class PujaService : IPujaService
         await _hubContext.Clients.Group($"auction-{subasta.Id}")
             .SendAsync("NewBid", response);
 
-        if (fueAntiSniping)
+        if (fueAntiSniping) // verificamos si es true.
         {
             await _hubContext.Clients.Group($"auction-{subasta.Id}")
                 .SendAsync("AuctionExtended", new
