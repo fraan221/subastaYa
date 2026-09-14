@@ -49,10 +49,16 @@ public class AuctionFinalizationWorker : BackgroundService
 
         var ahora = DateTime.UtcNow;
 
+        await ActivarSubastasProgramadasAsync(
+            context,
+            hubContext,
+            ahora,
+            ct);
+
         var subastasVencidas = await context.Subastas
             .Include(s => s.Pujas)
             .Where(s => s.Estado == EstadoSubasta.Activa
-                     && s.FechaFin <= ahora)
+                        && s.FechaFin <= ahora)
             .ToListAsync(ct);
 
         foreach (var subasta in subastasVencidas)
@@ -74,6 +80,55 @@ public class AuctionFinalizationWorker : BackgroundService
             {
                 _logger.LogError(ex,
                     "Error procesando subasta {SubastaId}.", subasta.Id);
+            }
+        }
+    }
+    //Activar subastas programadas.
+    private async Task ActivarSubastasProgramadasAsync(
+        AppDbContext context,
+        IHubContext<AuctionHub> hubContext,
+        DateTime ahora,
+        CancellationToken ct)
+    {
+        var subastasParaActivar = await context.Subastas
+            .Where(s => s.Estado == EstadoSubasta.Programada
+                     && s.FechaInicio <= ahora)
+            .ToListAsync(ct);
+
+        if (subastasParaActivar.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var subasta in subastasParaActivar)
+        {
+            subasta.Estado = EstadoSubasta.Activa;
+            subasta.Version++;
+        }
+
+        await context.SaveChangesAsync(ct);
+
+        foreach (var subasta in subastasParaActivar)
+        {
+            try
+            {
+                await hubContext.Clients
+                    .Group($"auction-{subasta.Id}")
+                    .SendAsync("AuctionStarted", new
+                    {
+                        SubastaId = subasta.Id,
+                        Estado = EstadoSubasta.Activa.ToString(),
+                        FechaInicio = subasta.FechaInicio,
+                        FechaFin = subasta.FechaFin
+                    }, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "La subasta {SubastaId} fue activada, " +
+                    "pero no se pudo enviar la notificacion.",
+                    subasta.Id);
             }
         }
     }
