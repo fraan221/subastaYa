@@ -59,7 +59,6 @@ public class BilleteraService : IBilleteraService
         };
         
         _billeteraRepository.AgregarTransaccion(transaccion);
-        await _billeteraRepository.GuardarCambiosAsync();
 
         var auditoria = new AuditoriaLog
         {
