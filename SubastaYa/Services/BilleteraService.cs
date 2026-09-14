@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SubastaYa.Exceptions;
 using SubastaYa.Models.Dtos.Requests;
 using SubastaYa.Models.Dtos.Responses;
@@ -45,6 +46,9 @@ public class BilleteraService : IBilleteraService
             throw new NotFoundException($"Billetera no encontrada, para usuario con ID {request.UsuarioId}");
         }
 
+        var saldoTotalPrevio = billetera.SaldoTotal;
+        var saldoDisponiblePrevio = billetera.SaldoDisponible;
+
         billetera.SaldoTotal += request.Monto;
         billetera.SaldoDisponible += request.Monto;
         billetera.Version++;
@@ -57,8 +61,26 @@ public class BilleteraService : IBilleteraService
             Fecha = DateTime.UtcNow,
             SubastaId = null
         };
-        
         _billeteraRepository.AgregarTransaccion(transaccion);
+
+        var auditoria = new AuditoriaLog
+        {
+            Entidad = nameof(Billetera),
+            EntidadId = billetera.Id,
+            Accion = "AcreditacionManual",
+            UsuarioId = billetera.UsuarioId,
+            DetalleJson = JsonSerializer.Serialize(new
+            {
+                Monto = request.Monto,
+                SaldoTotalPrevio = saldoTotalPrevio,
+                SaldoTotalNuevo = billetera.SaldoTotal,
+                SaldoDisponiblePrevio = saldoDisponiblePrevio,
+                SaldoDisponibleNuevo = billetera.SaldoDisponible
+            }),
+            Fecha = DateTime.UtcNow
+        };
+        _billeteraRepository.AgregarAuditoria(auditoria);
+
         await _billeteraRepository.GuardarCambiosAsync();
 
         return new BalanceResponse

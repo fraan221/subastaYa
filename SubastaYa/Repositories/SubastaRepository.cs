@@ -30,6 +30,11 @@ public class SubastaRepository : ISubastaRepository
         _context.Subastas.Add(subasta);
     }
 
+    public void AgregarAuditoria(AuditoriaLog auditoria)
+    {
+        _context.AuditoriaLogs.Add(auditoria);
+    }
+
     public async Task GuardarCambiosAsync()
     {
         await _context.SaveChangesAsync();

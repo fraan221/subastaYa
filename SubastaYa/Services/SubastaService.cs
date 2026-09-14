@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SubastaYa.Exceptions;
 using SubastaYa.Models.Dtos.Requests;
 using SubastaYa.Models.Dtos.Responses;
@@ -136,6 +137,26 @@ public class SubastaService : ISubastaService
 
         // 5. Persistir
         await _subastaRepository.GuardarCambiosAsync();
+
+        var auditoria = new AuditoriaLog
+        {
+            Entidad = nameof(Subasta),
+            EntidadId = subasta.Id,
+            Accion = "SubastaCreada",
+            UsuarioId = subasta.VendedorId,
+            DetalleJson = JsonSerializer.Serialize(new
+            {
+                subasta.Titulo,
+                subasta.PrecioBase,
+                subasta.IncrementoMinimo,
+                subasta.FechaInicio,
+                subasta.FechaFin,
+                EstadoInicial = subasta.Estado.ToString()
+            }),
+            Fecha = DateTime.UtcNow
+        };
+        _subastaRepository.AgregarAuditoria(auditoria);
+        await  _subastaRepository.GuardarCambiosAsync();
 
         // 6. Retornar respuesta
         return new SubastaResponse
