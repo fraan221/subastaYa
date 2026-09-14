@@ -90,9 +90,6 @@ public class AuctionFinalizationWorker : BackgroundService
             .ThenByDescending(p => p.FechaPuja)
             .First();
 
-        subasta.Estado = EstadoSubasta.Finalizada;
-        subasta.Version++;
-
         var billeteraComprador = await context.Billeteras
             .FirstOrDefaultAsync(
                 b => b.UsuarioId == pujaGanadora.CompradorId, ct);
@@ -101,37 +98,47 @@ public class AuctionFinalizationWorker : BackgroundService
             .FirstOrDefaultAsync(
                 b => b.UsuarioId == subasta.VendedorId, ct);
 
-        if (billeteraComprador != null && billeteraVendedor != null)
+        if (billeteraComprador is null || billeteraVendedor is null)
         {
-            //Comprador
-            billeteraComprador.SaldoRetenido -= pujaGanadora.Monto;
-            billeteraComprador.SaldoTotal -= pujaGanadora.Monto;
-            billeteraComprador.Version++;
-            
-            //Vendedor
-            billeteraVendedor.SaldoDisponible += pujaGanadora.Monto;
-            billeteraVendedor.SaldoTotal += pujaGanadora.Monto;
-            billeteraVendedor.Version++;
-            
-            //Comprador
-            context.TransaccionLedgers.Add(new TransaccionLedger
-            {
-                BilleteraId = billeteraComprador.Id,
-                Tipo = TipoTransaccion.Pago,
-                Monto = pujaGanadora.Monto,
-                Fecha = ahora,
-                SubastaId = subasta.Id
-            });
-            //Vendedor
-            context.TransaccionLedgers.Add(new TransaccionLedger
-            {
-                BilleteraId = billeteraVendedor.Id,
-                Tipo = TipoTransaccion.Cobro,
-                Monto = pujaGanadora.Monto,
-                Fecha = ahora,
-                SubastaId = subasta.Id
-            });
+            _logger.LogError(
+                "No se puede finalizar la subasta {SubastaId}: falta la billetera del comprador o del vendedor.",
+                subasta.Id);
+
+            return;
         }
+
+        subasta.Estado = EstadoSubasta.Finalizada;
+        subasta.Version++;
+
+        // Comprador
+        billeteraComprador.SaldoRetenido -= pujaGanadora.Monto;
+        billeteraComprador.SaldoTotal -= pujaGanadora.Monto;
+        billeteraComprador.Version++;
+
+        // Vendedor
+        billeteraVendedor.SaldoDisponible += pujaGanadora.Monto;
+        billeteraVendedor.SaldoTotal += pujaGanadora.Monto;
+        billeteraVendedor.Version++;
+
+        // Comprador
+        context.TransaccionLedgers.Add(new TransaccionLedger
+        {
+            BilleteraId = billeteraComprador.Id,
+            Tipo = TipoTransaccion.Pago,
+            Monto = pujaGanadora.Monto,
+            Fecha = ahora,
+            SubastaId = subasta.Id
+        });
+
+        // Vendedor
+        context.TransaccionLedgers.Add(new TransaccionLedger
+        {
+            BilleteraId = billeteraVendedor.Id,
+            Tipo = TipoTransaccion.Cobro,
+            Monto = pujaGanadora.Monto,
+            Fecha = ahora,
+            SubastaId = subasta.Id
+        });
 
         context.AuditoriaLogs.Add(new AuditoriaLog
         {
