@@ -57,6 +57,8 @@ builder.Services.AddScoped<IPujaRepository, PujaRepository>();
 builder.Services.AddScoped<IPujaService, PujaService>();
 builder.Services.AddScoped<ISubastaRepository, SubastaRepository>();
 builder.Services.AddScoped<ISubastaService, SubastaService>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
 builder.Services.AddScoped<IBilleteraService, BilleteraService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
