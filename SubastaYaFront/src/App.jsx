@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { authService } from "@/services/authService"
 import { LoginForm } from "@/components/login-form"
 import { AppSidebar } from "@/components/app-sidebar"
+import { AuctionForm } from "@/components/auction-form"
 import { CatalogPage } from "@/pages/CatalogPage"
 import {
   SidebarInset,
@@ -64,6 +65,10 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/subastas" replace />} />
               <Route path="/subastas" element={<CatalogPage />} />
+              <Route
+                path="/subastas/crear"
+                element={<AuctionForm user={user} />}
+              />
               {/* Fallback de cualquier otra ruta hacia el catálogo */}
               <Route path="*" element={<Navigate to="/subastas" replace />} />
             </Routes>

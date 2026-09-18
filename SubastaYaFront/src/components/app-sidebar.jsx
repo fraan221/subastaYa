@@ -28,7 +28,6 @@ const navItems = [
       {
         title: "Publicar Subasta",
         url: "/subastas/crear",
-        disabled: true,
       },
       {
         title: "Sala en Vivo",
