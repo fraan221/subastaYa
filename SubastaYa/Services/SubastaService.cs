@@ -19,7 +19,8 @@ public class SubastaService : ISubastaService
     }
     //Listado de subastas
     public async Task<PaginacionResponse<SubastaListadoResponse>> ListarSubastasAsync(
-        int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda)
+        int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda,
+        decimal? precioMin = null, decimal? precioMax = null, string? ordenamiento = null)
     {
         // 1. Normalizar parámetros de paginación
         if (pagina < 1) pagina = 1;
@@ -27,7 +28,7 @@ public class SubastaService : ISubastaService
 
         // 2. Delegar al repositorio
         var (items, totalCount) = await _subastaRepository.ListarSubastasAsync(
-            pagina, tamaño, estado, categoriaId, busqueda);
+            pagina, tamaño, estado, categoriaId, busqueda, precioMin, precioMax, ordenamiento);
 
         // 3. Mapear entidades a DTOs
         var itemsDto = items.Select(s => new SubastaListadoResponse
@@ -36,6 +37,7 @@ public class SubastaService : ISubastaService
             Titulo = s.Titulo,
             UrlImagen = s.UrlImagen,
             PrecioBase = s.PrecioBase,
+            FechaInicio = s.FechaInicio,
             FechaFin = s.FechaFin,
             Estado = s.Estado.ToString(),
             CategoriaNombre = s.Categoria.Nombre,

@@ -28,8 +28,26 @@ public class AuctionsController : ControllerBase
         [FromQuery] int tamaño = 10,
         [FromQuery] string? estado = null,
         [FromQuery] int? categoriaId = null,
-        [FromQuery] string? busqueda = null)
+        [FromQuery] string? busqueda = null,
+        [FromQuery] decimal? precioMin = null,
+        [FromQuery] decimal? precioMax = null,
+        [FromQuery] string? ordenamiento = null)
     {
+        if (precioMin.HasValue && precioMin.Value < 0)
+        {
+            return BadRequest(new { mensaje = "El precio mínimo no puede ser negativo." });
+        }
+
+        if (precioMax.HasValue && precioMax.Value < 0)
+        {
+            return BadRequest(new { mensaje = "El precio máximo no puede ser negativo." });
+        }
+
+        if (precioMin.HasValue && precioMax.HasValue && precioMin.Value > precioMax.Value)
+        {
+            return BadRequest(new { mensaje = "El precio mínimo no puede ser mayor al precio máximo." });
+        }
+
         EstadoSubasta? estadoEnum = null;
 
         if (!string.IsNullOrWhiteSpace(estado))
@@ -41,7 +59,8 @@ public class AuctionsController : ControllerBase
             estadoEnum = parsed;
         }
 
-        var resultado = await _subastaService.ListarSubastasAsync(pagina, tamaño, estadoEnum, categoriaId, busqueda);
+        var resultado = await _subastaService.ListarSubastasAsync(
+            pagina, tamaño, estadoEnum, categoriaId, busqueda, precioMin, precioMax, ordenamiento);
         return Ok(resultado);
     }
 

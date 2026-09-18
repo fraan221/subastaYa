@@ -8,6 +8,7 @@ public interface ISubastaService
 {
     Task<SubastaResponse> CrearSubastaAsync(CrearSubastaRequest request);
     Task<PaginacionResponse<SubastaListadoResponse>> ListarSubastasAsync(
-        int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda);
+        int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda,
+        decimal? precioMin = null, decimal? precioMax = null, string? ordenamiento = null);
     Task<SubastaDetalleResponse> ObtenerSubastaAsync(int id);
 }

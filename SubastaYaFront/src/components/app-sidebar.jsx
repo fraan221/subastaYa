@@ -12,24 +12,30 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { ActivityIcon, GavelIcon, WalletIcon } from "lucide-react"
+import { GavelIcon } from "lucide-react"
 
 const navItems = [
   {
-    title: "Conexión y Diagnóstico",
-    url: "#",
-    icon: <ActivityIcon />,
-    isActive: true,
-  },
-  {
     title: "Subastas",
-    url: "#",
+    url: "/subastas",
     icon: <GavelIcon />,
-  },
-  {
-    title: "Billetera",
-    url: "#",
-    icon: <WalletIcon />,
+    isActive: true,
+    items: [
+      {
+        title: "Explorar Catálogo",
+        url: "/subastas",
+      },
+      {
+        title: "Publicar Subasta",
+        url: "/subastas/crear",
+        disabled: true,
+      },
+      {
+        title: "Sala en Vivo",
+        url: "/subastas/en-vivo",
+        disabled: true,
+      },
+    ],
   },
 ]
 
