@@ -56,7 +56,6 @@ export function CatalogPage() {
   // Paginación
   const [pagina, setPagina] = useState(1)
   const [totalPaginas, setTotalPaginas] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
 
   // Cargar categorías disponibles (una sola vez)
   useEffect(() => {
@@ -96,7 +95,6 @@ export function CatalogPage() {
         if (!ignore) {
           setAuctions(data.items || [])
           setTotalPaginas(data.totalPaginas || 1)
-          setTotalItems(data.totalItems || 0)
         }
       } catch (err) {
         if (!ignore) {

@@ -52,4 +52,9 @@ export const auctionService = {
     const response = await apiClient.get('/categories')
     return response.data
   },
+
+  async create(payload) {
+    const response = await apiClient.post('/auctions', payload)
+    return response.data
+  },
 }
