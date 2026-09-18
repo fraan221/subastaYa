@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import * as React from "react";
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -11,8 +11,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { GavelIcon } from "lucide-react"
+} from "@/components/ui/sidebar";
+import { Command, GavelIcon } from "lucide-react";
 
 const navItems = [
   {
@@ -26,7 +26,7 @@ const navItems = [
         url: "/subastas",
       },
       {
-        title: "Publicar Subasta",
+        title: "Publicar",
         url: "/subastas/crear",
       },
       {
@@ -36,21 +36,21 @@ const navItems = [
       },
     ],
   },
-]
+];
 
-export function AppSidebar({
-  user,
-  onLogout,
-  ...props
-}) {
+export function AppSidebar({ user, onLogout, ...props }) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg">
-              <div className="grid flex-1 text-left text-lg">
-                <span className="font-semibold">SubastaYa</span>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <Command className="size-4" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">SubastaYa</span>
+                <span className="truncate text-xs">Enterprise</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -63,5 +63,5 @@ export function AppSidebar({
         <NavUser user={user} onLogout={onLogout} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

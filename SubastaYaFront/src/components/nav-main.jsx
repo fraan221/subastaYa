@@ -1,9 +1,9 @@
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -13,18 +13,20 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-import { ChevronRightIcon } from "lucide-react"
+} from "@/components/ui/sidebar";
+import { ChevronRightIcon } from "lucide-react";
 
 export function NavMain({ items }) {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => {
-          const hasChildren = Boolean(item.items?.length)
-          const isParentActive = item.items?.some((sub) => location.pathname === sub.url) || location.pathname === item.url
+          const hasChildren = Boolean(item.items?.length);
+          const isParentActive =
+            item.items?.some((sub) => location.pathname === sub.url) ||
+            location.pathname === item.url;
 
           return (
             <Collapsible
@@ -61,7 +63,7 @@ export function NavMain({ items }) {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {item.items.map((subItem) => {
-                        const isSubActive = location.pathname === subItem.url
+                        const isSubActive = location.pathname === subItem.url;
 
                         return (
                           <SidebarMenuSubItem key={subItem.title}>
@@ -84,16 +86,16 @@ export function NavMain({ items }) {
                               </SidebarMenuSubButton>
                             )}
                           </SidebarMenuSubItem>
-                        )
+                        );
                       })}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </>
               ) : null}
             </Collapsible>
-          )
+          );
         })}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
