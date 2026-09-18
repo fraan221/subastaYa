@@ -56,7 +56,6 @@ export function CatalogPage() {
   // Paginación
   const [pagina, setPagina] = useState(1)
   const [totalPaginas, setTotalPaginas] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
 
   // Cargar categorías disponibles (una sola vez)
   useEffect(() => {
@@ -96,7 +95,6 @@ export function CatalogPage() {
         if (!ignore) {
           setAuctions(data.items || [])
           setTotalPaginas(data.totalPaginas || 1)
-          setTotalItems(data.totalItems || 0)
         }
       } catch (err) {
         if (!ignore) {
@@ -138,11 +136,10 @@ export function CatalogPage() {
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
 
       {/* Barra Simplificada de Filtros */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
         <div className="flex flex-wrap items-center gap-3">
           {/* Filtro Estado */}
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground font-medium">Estado:</span>
             <Select
               items={ESTADOS}
               value={estado}
@@ -151,7 +148,7 @@ export function CatalogPage() {
                 setPagina(1)
               }}
             >
-              <SelectTrigger className="h-9 min-w-[160px]">
+              <SelectTrigger className="h-9 min-w-40">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
@@ -168,7 +165,6 @@ export function CatalogPage() {
 
           {/* Filtro Categoría */}
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground font-medium">Categoría:</span>
             <Select
               items={categoryItems}
               value={categoriaId}
@@ -177,7 +173,7 @@ export function CatalogPage() {
                 setPagina(1)
               }}
             >
-              <SelectTrigger className="h-9 min-w-[180px]">
+              <SelectTrigger className="h-9 min-w-45">
                 <SelectValue placeholder="Categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -194,7 +190,6 @@ export function CatalogPage() {
 
           {/* Rango de Precios */}
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground font-medium">Precio:</span>
             <Input
               type="number"
               min="0"
@@ -228,15 +223,13 @@ export function CatalogPage() {
               onClick={handleResetFilters}
               className="h-9 text-muted-foreground hover:text-foreground"
             >
-              <FilterXIcon className="size-4 mr-1.5" />
-              Limpiar
+              <FilterXIcon className="size-4" />
             </Button>
           ) : null}
         </div>
 
         {/* Ordenamiento a la derecha */}
         <div className="flex items-center gap-1.5 ml-auto">
-          <span className="text-xs text-muted-foreground font-medium">Ordenar:</span>
           <Select
             items={ORDENAMIENTOS}
             value={ordenamiento}
@@ -245,7 +238,7 @@ export function CatalogPage() {
               setPagina(1)
             }}
           >
-            <SelectTrigger className="h-9 min-w-[180px]">
+            <SelectTrigger className="h-9 min-w-45">
               <SelectValue placeholder="Ordenar" />
             </SelectTrigger>
             <SelectContent>

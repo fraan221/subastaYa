@@ -22,7 +22,7 @@ const navItems = [
     isActive: true,
     items: [
       {
-        title: "Explorar Catálogo",
+        title: "Catálogo",
         url: "/subastas",
       },
       {
@@ -50,12 +50,8 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-                SY
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">SubastaYa</span>
-                <span className="truncate text-xs text-muted-foreground">Front + Back (.NET)</span>
+              <div className="grid flex-1 text-left text-lg">
+                <span className="font-semibold">SubastaYa</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

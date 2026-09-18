@@ -1,6 +1,6 @@
 import { useCountdown } from "@/hooks/use-countdown"
 import { Badge } from "@/components/ui/badge"
-import { ClockIcon } from "lucide-react"
+import { ClockIcon, ClockAlertIcon, ClockCheck } from "lucide-react"
 
 /**
  * Componente que muestra el contador regresivo de una subasta con retroalimentación visual:
@@ -15,10 +15,22 @@ export function CountdownBadge({ fechaFin, fechaInicio, estado }) {
   const targetDate = isProgramada ? fechaInicio : fechaFin
   const { days, hours, minutes, seconds, totalSeconds, isExpired } = useCountdown(targetDate)
 
-  if (estado === "Finalizada" || estado === "Desierta" || (!isProgramada && isExpired)) {
+  if (estado === "Desierta")
+  {
     return (
-      <Badge variant="secondary" className="font-mono text-xs">
-        <ClockIcon data-icon="inline-start" className="size-3.5" />
+      <>
+        <Badge variant="destructive" className="text-xs">
+          <ClockAlertIcon data-icon="inline-start" className="size-3.5" />
+          Desierta
+        </Badge>
+      </>
+    )
+  }
+
+  if (estado === "Finalizada" || (!isProgramada && isExpired)) {
+    return (
+      <Badge variant="secondary" className="text-xs">
+        <ClockCheck data-icon="inline-start" className="size-3.5" />
         Finalizada
       </Badge>
     )
@@ -27,7 +39,7 @@ export function CountdownBadge({ fechaFin, fechaInicio, estado }) {
   if (isProgramada) {
     if (isExpired) {
       return (
-        <Badge variant="outline" className="border-blue-500/50 text-blue-600 bg-blue-50/50 dark:bg-blue-950/20 font-mono text-xs">
+        <Badge variant="outline" className="border-blue-500/50 text-blue-600 bg-blue-50/50 dark:bg-blue-950/20 text-xs">
           <ClockIcon data-icon="inline-start" className="size-3.5" />
           Iniciando...
         </Badge>
@@ -36,7 +48,7 @@ export function CountdownBadge({ fechaFin, fechaInicio, estado }) {
 
     const formatted = days > 0 ? `${days}d ${hours}h` : `${hours}h ${minutes}m ${seconds}s`
     return (
-      <Badge variant="outline" className="border-blue-500/40 text-blue-600 bg-blue-50/40 dark:bg-blue-950/20 font-mono text-xs">
+      <Badge variant="outline" className="border-blue-500/40 text-blue-600 bg-blue-50/40 dark:bg-blue-950/20 text-xs">
         <ClockIcon data-icon="inline-start" className="size-3.5" />
         Inicia en {formatted}
       </Badge>
@@ -66,7 +78,7 @@ export function CountdownBadge({ fechaFin, fechaInicio, estado }) {
     return (
       <Badge
         variant="outline"
-        className="border-amber-500 text-amber-600 bg-amber-50/60 dark:bg-amber-950/30 font-mono text-xs font-semibold"
+        className="border-amber-500 text-amber-600 bg-amber-50/60 dark:bg-amber-950/30 text-xs font-semibold"
       >
         <ClockIcon data-icon="inline-start" className="size-3.5" />
         {formattedTime}
@@ -76,7 +88,7 @@ export function CountdownBadge({ fechaFin, fechaInicio, estado }) {
 
   // Normal > 5 minutos
   return (
-    <Badge variant="outline" className="font-mono text-xs text-muted-foreground">
+    <Badge variant="outline" className="text-xs text-muted-foreground">
       <ClockIcon data-icon="inline-start" className="size-3.5" />
       {formattedTime}
     </Badge>

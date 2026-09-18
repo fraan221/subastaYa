@@ -53,7 +53,7 @@ export default function App() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Catálogo de Subastas</BreadcrumbPage>
+                    <BreadcrumbPage>Catálogo</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>

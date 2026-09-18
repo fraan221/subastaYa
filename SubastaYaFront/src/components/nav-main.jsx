@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/collapsible"
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
@@ -22,7 +21,6 @@ export function NavMain({ items }) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Navegación</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const hasChildren = Boolean(item.items?.length)
@@ -54,7 +52,7 @@ export function NavMain({ items }) {
                 <>
                   <CollapsibleTrigger
                     render={
-                      <SidebarMenuAction className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      <SidebarMenuAction className="transition-transform duration-200 aria-expanded:rotate-90 data-panel-open:rotate-90" />
                     }
                   >
                     <ChevronRightIcon />
