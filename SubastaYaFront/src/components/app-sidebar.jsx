@@ -22,33 +22,17 @@ const navItems = [
     isActive: true,
     items: [
       {
-        title: "Catálogo",
+        title: "Explorar",
         url: "/subastas",
       },
       {
-        title: "Publicar",
+        title: "Subastar",
         url: "/subastas/crear",
       },
       {
-        title: "Sala en Vivo",
+        title: "En Vivo",
         url: "/subastas/en-vivo",
         disabled: true,
-      },
-    ],
-  },
-  {
-    title: "Mis Actividades",
-    url: "/mis-actividades",
-    icon: <ActivityIcon />,
-    isActive: true,
-    items: [
-      {
-        title: "Mis Compras / Pujas",
-        url: "/mis-actividades/compras",
-      },
-      {
-        title: "Mis Publicaciones",
-        url: "/mis-actividades/publicaciones",
       },
     ],
   },
@@ -59,16 +43,32 @@ const navItems = [
     isActive: true,
     items: [
       {
-        title: "Balance",
+        title: "Saldo",
         url: "/billetera",
       },
       {
-        title: "Cargar",
+        title: "Recargar",
         url: "/billetera/cargar",
       },
       {
-        title: "Movimientos",
+        title: "Historial",
         url: "/billetera/movimientos",
+      },
+    ],
+  },
+  {
+    title: "Actividad",
+    url: "/mis-actividades",
+    icon: <ActivityIcon />,
+    isActive: true,
+    items: [
+      {
+        title: "Pujas",
+        url: "/mis-actividades/compras",
+      },
+      {
+        title: "Ventas",
+        url: "/mis-actividades/publicaciones",
       },
     ],
   },
@@ -86,7 +86,7 @@ export function AppSidebar({ user, onLogout, ...props }) {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">SubastaYa</span>
-                <span className="truncate text-xs">Enterprise</span>
+                <span className="truncate text-xs">Portal</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

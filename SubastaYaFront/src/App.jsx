@@ -31,20 +31,21 @@ import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/toast";
 
 const headerTitles = {
-  "/subastas": "Catálogo",
-  "/subastas/crear": "Publicar",
-  "/mis-actividades/compras": "Mis Compras / Pujas",
-  "/mis-actividades/publicaciones": "Mis Publicaciones",
-  "/billetera": "Balance",
-  "/billetera/cargar": "Cargar",
-  "/billetera/movimientos": "Movimientos",
+  "/subastas": "Explorar",
+  "/subastas/crear": "Subastar",
+  "/subastas/en-vivo": "En Vivo",
+  "/billetera": "Saldo",
+  "/billetera/cargar": "Recargar",
+  "/billetera/movimientos": "Historial",
+  "/mis-actividades/compras": "Pujas",
+  "/mis-actividades/publicaciones": "Ventas",
 };
 
 function AppHeader() {
   const location = useLocation();
   const title = headerTitles[location.pathname] || "Subastas";
   const section = location.pathname.startsWith("/mis-actividades")
-    ? "Mis Actividades"
+    ? "Actividad"
     : location.pathname.startsWith("/billetera")
       ? "Billetera"
       : "Subastas";
@@ -115,9 +116,7 @@ export default function App() {
                 />
                 <Route
                   path="/mis-actividades"
-                  element={
-                    <Navigate to="/mis-actividades/compras" replace />
-                  }
+                  element={<Navigate to="/mis-actividades/compras" replace />}
                 />
                 <Route
                   path="/mis-actividades/compras"

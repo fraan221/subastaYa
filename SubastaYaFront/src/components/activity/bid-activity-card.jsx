@@ -1,53 +1,57 @@
-import { useState } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { CountdownBadge } from "@/components/countdown-badge"
-import { TagIcon, TrophyIcon } from "lucide-react"
+import { useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CountdownBadge } from "@/components/countdown-badge";
+import { TagIcon, TrophyIcon } from "lucide-react";
 
 const fallbackImage =
-  "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&auto=format&fit=crop&q=80"
+  "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&auto=format&fit=crop&q=80";
 
 function formatCurrency(value) {
   if (value === null || value === undefined) {
-    return "Sin ofertas"
+    return "Sin ofertas";
   }
 
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(value);
 }
 
 function formatDate(value) {
-  if (!value) return "Sin fecha"
+  if (!value) return "Sin fecha";
 
   return new Intl.DateTimeFormat("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value))
+  }).format(new Date(value));
 }
 
 function getResultClass(resultado) {
   switch (resultado) {
     case "Ganaste":
-      return "border-emerald-500/50 bg-emerald-50/60 text-emerald-700"
+      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
     case "Perdiste":
-      return "border-red-500/50 bg-red-50/60 text-red-700"
+      return "border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400";
     case "Desierta":
-      return "border-destructive/50 text-destructive"
+      return "border-destructive/20 bg-destructive/10 text-destructive";
     default:
-      return "border-blue-500/50 bg-blue-50/60 text-blue-700"
+      return "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400";
   }
 }
 
 export function BidActivityCard({ activity }) {
-  const [imageFailed, setImageFailed] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <Card>
       <img
-        src={imageFailed || !activity.urlImagen ? fallbackImage : activity.urlImagen}
+        src={
+          imageFailed || !activity.urlImagen
+            ? fallbackImage
+            : activity.urlImagen
+        }
         alt={activity.titulo}
         onError={() => setImageFailed(true)}
         loading="lazy"
@@ -90,9 +94,7 @@ export function BidActivityCard({ activity }) {
           </div>
 
           <div>
-            <span className="text-xs text-muted-foreground">
-              Oferta actual
-            </span>
+            <span className="text-xs text-muted-foreground">Oferta actual</span>
             <p className="text-lg font-bold">
               {formatCurrency(activity.montoActual)}
             </p>
@@ -101,9 +103,9 @@ export function BidActivityCard({ activity }) {
 
         <div className="flex items-center justify-between border-t pt-3 text-xs text-muted-foreground">
           <span>{activity.cantidadPujas} pujas</span>
-          <span>Finaliza {formatDate(activity.fechaFin)}</span>
+          <span>Finalizó el {formatDate(activity.fechaFin)}</span>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
