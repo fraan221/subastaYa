@@ -11,6 +11,7 @@ import { LoginForm } from "@/components/login-form";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuctionForm } from "@/components/auction-form";
 import { CatalogPage } from "@/pages/CatalogPage";
+import { MisActividadesPage } from "@/pages/MisActividadesPage";
 import { WalletBalancePage } from "@/pages/WalletBalancePage";
 import { WalletDepositPage } from "@/pages/WalletDepositPage";
 import { WalletTransactionsPage } from "@/pages/WalletTransactionsPage";
@@ -32,6 +33,8 @@ import { Toaster } from "@/components/ui/toast";
 const headerTitles = {
   "/subastas": "Catálogo",
   "/subastas/crear": "Publicar",
+  "/mis-actividades/compras": "Mis Compras / Pujas",
+  "/mis-actividades/publicaciones": "Mis Publicaciones",
   "/billetera": "Balance",
   "/billetera/cargar": "Cargar",
   "/billetera/movimientos": "Movimientos",
@@ -40,9 +43,11 @@ const headerTitles = {
 function AppHeader() {
   const location = useLocation();
   const title = headerTitles[location.pathname] || "Subastas";
-  const section = location.pathname.startsWith("/billetera")
-    ? "Billetera"
-    : "Subastas";
+  const section = location.pathname.startsWith("/mis-actividades")
+    ? "Mis Actividades"
+    : location.pathname.startsWith("/billetera")
+      ? "Billetera"
+      : "Subastas";
 
   return (
     <header className="flex h-16 items-center border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -107,6 +112,20 @@ export default function App() {
                 <Route
                   path="/subastas/crear"
                   element={<AuctionForm user={user} />}
+                />
+                <Route
+                  path="/mis-actividades"
+                  element={
+                    <Navigate to="/mis-actividades/compras" replace />
+                  }
+                />
+                <Route
+                  path="/mis-actividades/compras"
+                  element={<MisActividadesPage type="bids" />}
+                />
+                <Route
+                  path="/mis-actividades/publicaciones"
+                  element={<MisActividadesPage type="listings" />}
                 />
                 <Route
                   path="/billetera"

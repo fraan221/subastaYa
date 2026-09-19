@@ -62,6 +62,8 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IBilleteraRepository, BilleteraRepository>();
 builder.Services.AddScoped<IBilleteraService, BilleteraService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IActivitiesRepository, ActivitiesRepository>();
+builder.Services.AddScoped<IActivitiesService, ActivitiesService>();
 
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<AuctionFinalizationWorker>();
