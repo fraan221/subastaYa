@@ -1,0 +1,12 @@
+{
+  "name": "subastaya-stress-test",
+  "version": "1.0.0",
+  "description": "Prueba de concurrencia optimista y estres para SubastaYa API utilizando Newman",
+  "main": "run_concurrency.js",
+  "scripts": {
+    "test": "node run_concurrency.js"
+  },
+  "dependencies": {
+    "newman": "^6.2.2"
+  }
+}
