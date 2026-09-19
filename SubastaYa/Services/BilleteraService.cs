@@ -92,4 +92,38 @@ public class BilleteraService : IBilleteraService
             SaldoDisponible = billetera.SaldoDisponible
         };
     }
+
+    public async Task<BalanceResponse> ObtenerBalancePorUsuarioIdAsync(int usuarioId)
+    {
+        var billetera = await _billeteraRepository.ObtenerPorUsuarioIdAsync(usuarioId);
+        if (billetera == null)
+        {
+            throw new NotFoundException($"Billetera no encontrada para el usuario con ID {usuarioId}");
+        }
+
+        return new BalanceResponse
+        {
+            UsuarioId = billetera.UsuarioId,
+            UsuarioNombre = billetera.Usuario?.Nombre ?? string.Empty,
+            SaldoTotal = billetera.SaldoTotal,
+            SaldoRetenido = billetera.SaldoRetenido,
+            SaldoDisponible = billetera.SaldoDisponible
+        };
+    }
+
+    public async Task<List<TransaccionResponse>> ObtenerTransaccionesPorUsuarioIdAsync(int usuarioId)
+    {
+        var transacciones = await _billeteraRepository.ObtenerTransaccionesPorUsuarioIdAsync(usuarioId);
+
+        return transacciones.Select(t => new TransaccionResponse
+        {
+            Id = t.Id,
+            BilleteraId = t.BilleteraId,
+            Tipo = t.Tipo.ToString(),
+            Monto = t.Monto,
+            Fecha = t.Fecha,
+            SubastaId = t.SubastaId,
+            SubastaTitulo = t.Subasta?.Titulo
+        }).ToList();
+    }
 }

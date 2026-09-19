@@ -22,7 +22,18 @@ public class BilleteraRepository : IBilleteraRepository
 
     public async Task<Billetera?> ObtenerPorUsuarioIdAsync(int usuarioId)
     {
-        return await _context.Billeteras.FirstOrDefaultAsync(b => b.UsuarioId == usuarioId);
+        return await _context.Billeteras
+            .Include(b => b.Usuario)
+            .FirstOrDefaultAsync(b => b.UsuarioId == usuarioId);
+    }
+
+    public async Task<List<TransaccionLedger>> ObtenerTransaccionesPorUsuarioIdAsync(int usuarioId)
+    {
+        return await _context.TransaccionLedgers
+            .Include(t => t.Subasta)
+            .Where(t => t.Billetera.UsuarioId == usuarioId)
+            .OrderByDescending(t => t.Fecha)
+            .ToListAsync();
     }
 
     public void AgregarTransaccion(TransaccionLedger transaccion)

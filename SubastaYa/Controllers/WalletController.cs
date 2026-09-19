@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SubastaYa.Exceptions;
@@ -19,11 +20,73 @@ public class WalletController : ControllerBase
     }
 
     [HttpGet("balance")]
-    [ProducesResponseType(typeof(List<BalanceResponse>), 200)]
-    public async Task<IActionResult> ObtenerBalances()
+    [ProducesResponseType(typeof(BalanceResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerBalance([FromQuery] int? usuarioId = null)
     {
-        var resultado = await _billeteraService.ObtenerBalanceAsync();
-        return Ok(resultado);
+        var targetUserId = usuarioId;
+
+        if (!targetUserId.HasValue)
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("usuario_id")?.Value;
+
+            if (int.TryParse(idClaim, out var claimUserId))
+            {
+                targetUserId = claimUserId;
+            }
+        }
+
+        if (!targetUserId.HasValue)
+        {
+            return BadRequest(new { mensaje = "El ID del usuario es requerido para consultar el balance." });
+        }
+
+        try
+        {
+            var balance = await _billeteraService.ObtenerBalancePorUsuarioIdAsync(targetUserId.Value);
+            return Ok(balance);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
+    }
+
+    [HttpGet("transactions")]
+    [ProducesResponseType(typeof(List<TransaccionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerTransacciones([FromQuery] int? usuarioId = null)
+    {
+        var targetUserId = usuarioId;
+
+        if (!targetUserId.HasValue)
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("usuario_id")?.Value;
+
+            if (int.TryParse(idClaim, out var claimUserId))
+            {
+                targetUserId = claimUserId;
+            }
+        }
+
+        if (!targetUserId.HasValue)
+        {
+            return BadRequest(new { mensaje = "El ID del usuario es requerido para consultar las transacciones." });
+        }
+
+        try
+        {
+            var transacciones = await _billeteraService.ObtenerTransaccionesPorUsuarioIdAsync(targetUserId.Value);
+            return Ok(transacciones);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
     }
 
     [HttpPost("deposit")]

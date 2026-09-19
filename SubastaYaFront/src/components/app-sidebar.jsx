@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Command, GavelIcon } from "lucide-react";
+import { Command, GavelIcon, WalletIcon } from "lucide-react";
 
 const navItems = [
   {
@@ -33,6 +33,26 @@ const navItems = [
         title: "Sala en Vivo",
         url: "/subastas/en-vivo",
         disabled: true,
+      },
+    ],
+  },
+  {
+    title: "Billetera",
+    url: "/billetera",
+    icon: <WalletIcon />,
+    isActive: true,
+    items: [
+      {
+        title: "Balance",
+        url: "/billetera",
+      },
+      {
+        title: "Cargar",
+        url: "/billetera/cargar",
+      },
+      {
+        title: "Movimientos",
+        url: "/billetera/movimientos",
       },
     ],
   },

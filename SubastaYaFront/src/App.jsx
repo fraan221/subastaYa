@@ -11,6 +11,9 @@ import { LoginForm } from "@/components/login-form";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuctionForm } from "@/components/auction-form";
 import { CatalogPage } from "@/pages/CatalogPage";
+import { WalletBalancePage } from "@/pages/WalletBalancePage";
+import { WalletDepositPage } from "@/pages/WalletDepositPage";
+import { WalletTransactionsPage } from "@/pages/WalletTransactionsPage";
 import {
   SidebarInset,
   SidebarProvider,
@@ -29,11 +32,17 @@ import { Toaster } from "@/components/ui/toast";
 const headerTitles = {
   "/subastas": "Catálogo",
   "/subastas/crear": "Publicar",
+  "/billetera": "Balance",
+  "/billetera/cargar": "Cargar",
+  "/billetera/movimientos": "Movimientos",
 };
 
 function AppHeader() {
   const location = useLocation();
-  const title = headerTitles[location.pathname];
+  const title = headerTitles[location.pathname] || "Subastas";
+  const section = location.pathname.startsWith("/billetera")
+    ? "Billetera"
+    : "Subastas";
 
   return (
     <header className="flex h-16 items-center border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -43,7 +52,7 @@ function AppHeader() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <span className="text-muted-foreground">Subastas</span>
+              <span className="text-muted-foreground">{section}</span>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
@@ -98,6 +107,18 @@ export default function App() {
                 <Route
                   path="/subastas/crear"
                   element={<AuctionForm user={user} />}
+                />
+                <Route
+                  path="/billetera"
+                  element={<WalletBalancePage user={user} />}
+                />
+                <Route
+                  path="/billetera/cargar"
+                  element={<WalletDepositPage user={user} />}
+                />
+                <Route
+                  path="/billetera/movimientos"
+                  element={<WalletTransactionsPage user={user} />}
                 />
                 {/* Fallback de cualquier otra ruta hacia el catálogo */}
                 <Route path="*" element={<Navigate to="/subastas" replace />} />
