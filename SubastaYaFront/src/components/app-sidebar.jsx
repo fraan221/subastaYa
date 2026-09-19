@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Command, GavelIcon } from "lucide-react";
+import { ActivityIcon, Command, GavelIcon } from "lucide-react";
 
 const navItems = [
   {
@@ -33,6 +33,22 @@ const navItems = [
         title: "Sala en Vivo",
         url: "/subastas/en-vivo",
         disabled: true,
+      },
+    ],
+  },
+  {
+    title: "Mis Actividades",
+    url: "/mis-actividades",
+    icon: <ActivityIcon />,
+    isActive: true,
+    items: [
+      {
+        title: "Mis Compras / Pujas",
+        url: "/mis-actividades/compras",
+      },
+      {
+        title: "Mis Publicaciones",
+        url: "/mis-actividades/publicaciones",
       },
     ],
   },

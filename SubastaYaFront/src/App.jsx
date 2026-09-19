@@ -11,6 +11,7 @@ import { LoginForm } from "@/components/login-form";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuctionForm } from "@/components/auction-form";
 import { CatalogPage } from "@/pages/CatalogPage";
+import { MisActividadesPage } from "@/pages/MisActividadesPage";
 import {
   SidebarInset,
   SidebarProvider,
@@ -29,11 +30,16 @@ import { Toaster } from "@/components/ui/toast";
 const headerTitles = {
   "/subastas": "Catálogo",
   "/subastas/crear": "Publicar",
+  "/mis-actividades/compras": "Mis Compras / Pujas",
+  "/mis-actividades/publicaciones": "Mis Publicaciones",
 };
 
 function AppHeader() {
   const location = useLocation();
-  const title = headerTitles[location.pathname];
+  const title = headerTitles[location.pathname] || "Subastas";
+  const sectionTitle = location.pathname.startsWith("/mis-actividades")
+    ? "Mis Actividades"
+    : "Subastas";
 
   return (
     <header className="flex h-16 items-center border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -43,7 +49,7 @@ function AppHeader() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <span className="text-muted-foreground">Subastas</span>
+              <span className="text-muted-foreground">{sectionTitle}</span>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
@@ -98,6 +104,20 @@ export default function App() {
                 <Route
                   path="/subastas/crear"
                   element={<AuctionForm user={user} />}
+                />
+                <Route
+                  path="/mis-actividades"
+                  element={
+                    <Navigate to="/mis-actividades/compras" replace />
+                  }
+                />
+                <Route
+                  path="/mis-actividades/compras"
+                  element={<MisActividadesPage type="bids" />}
+                />
+                <Route
+                  path="/mis-actividades/publicaciones"
+                  element={<MisActividadesPage type="listings" />}
                 />
                 {/* Fallback de cualquier otra ruta hacia el catálogo */}
                 <Route path="*" element={<Navigate to="/subastas" replace />} />
