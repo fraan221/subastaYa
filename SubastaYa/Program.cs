@@ -13,7 +13,39 @@ using SubastaYa.Workers;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info = new()
+        {
+            Title = "SubastaYa API",
+            Version = "v1",
+            Description = "API RESTful para la plataforma de subastas en tiempo real y comercio electrónico SubastaYa."
+        };
+
+        var scheme = new Microsoft.OpenApi.OpenApiSecurityScheme
+        {
+            Type = Microsoft.OpenApi.SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Ingrese el token JWT obtenido en /api/auth/login"
+        };
+        document.Components ??= new Microsoft.OpenApi.OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, Microsoft.OpenApi.IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes["Bearer"] = scheme;
+
+        var schemeReference = new Microsoft.OpenApi.OpenApiSecuritySchemeReference("Bearer", document);
+        var requirement = new Microsoft.OpenApi.OpenApiSecurityRequirement
+        {
+            [schemeReference] = new List<string>()
+        };
+        document.Security ??= new List<Microsoft.OpenApi.OpenApiSecurityRequirement>();
+        document.Security.Add(requirement);
+
+        return Task.CompletedTask;
+    });
+});
 
 builder.Services.AddCors(options =>
 {
@@ -71,6 +103,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "SubastaYa API v1");
+        options.RoutePrefix = "swagger";
+    });
 }
 
 app.UseCors("FrontendPolicy");

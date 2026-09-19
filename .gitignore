@@ -4,8 +4,10 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 
-# Rider / IntelliJ IDEs
+# Tooling and IDE caches
 .idea/
+.agents/
+skills-lock.json
 
 # User-specific files
 *.user
