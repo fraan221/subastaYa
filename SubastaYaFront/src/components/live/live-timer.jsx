@@ -1,20 +1,55 @@
 import { useCountdown } from '@/hooks/use-countdown'
-import { Clock, AlertTriangle } from 'lucide-react'
+import { Clock, AlertTriangle, CheckCircle, Ban } from 'lucide-react'
 
-/**
- * Componente de temporizador en vivo con cuenta regresiva en tiempo real.
- * Si el tiempo restante ingresa en la zona crítica (último minuto, <= 60s),
- * cambia dinámicamente de apariencia (fondo y borde rojo, animación pulsante y alerta)
- * para advertir a los postores.
- */
 export function LiveTimer({ fechaFin, estado }) {
   const { days, hours, minutes, seconds, totalSeconds, isExpired } = useCountdown(fechaFin)
 
-  if (estado === 'Finalizada' || estado === 'Desierta' || isExpired) {
+  if (estado === 'Finalizada' || isExpired) {
     return (
-      <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-muted text-muted-foreground font-semibold">
-        <Clock className="size-5" />
-        <span>Subasta {estado === 'Desierta' ? 'Desierta' : 'Finalizada'}</span>
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center justify-between p-3.5 rounded-xl bg-muted/50 border text-foreground"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <CheckCircle className="size-5" aria-hidden="true" />
+          </div>
+          <div>
+            <span className="text-[11px] uppercase font-semibold tracking-wider block text-muted-foreground">
+              Estado
+            </span>
+            <span className="text-base font-bold">Subasta Finalizada</span>
+          </div>
+        </div>
+        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted border text-muted-foreground">
+          Cerrada
+        </span>
+      </div>
+    )
+  }
+
+  if (estado === 'Desierta') {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center justify-between p-3.5 rounded-xl bg-muted/50 border text-muted-foreground"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-muted">
+            <Ban className="size-5" aria-hidden="true" />
+          </div>
+          <div>
+            <span className="text-[11px] uppercase font-semibold tracking-wider block">
+              Estado
+            </span>
+            <span className="text-base font-bold">Subasta Desierta</span>
+          </div>
+        </div>
+        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted border">
+          Sin ofertas
+        </span>
       </div>
     )
   }
@@ -25,29 +60,31 @@ export function LiveTimer({ fechaFin, estado }) {
 
   return (
     <div
-      className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${
+      role="region"
+      aria-label="Temporizador de subasta en tiempo real"
+      className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-300 ${
         isCritical
-          ? 'bg-red-500/10 border-red-500/40 text-red-600 dark:text-red-400 animate-pulse shadow-sm'
+          ? 'bg-red-500/10 border-red-500/40 text-red-600 dark:text-red-400'
           : isWarning
-          ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+          ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
           : 'bg-card border-border text-foreground'
       }`}
     >
       <div className="flex items-center gap-3">
         {isCritical ? (
-          <div className="p-2 rounded-lg bg-red-500/20 animate-bounce">
-            <AlertTriangle className="size-6 text-red-600 dark:text-red-400" />
+          <div className="p-2 rounded-lg bg-red-500/20 text-red-600 dark:text-red-400">
+            <AlertTriangle className="size-5 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
           </div>
         ) : (
-          <div className="p-2 rounded-lg bg-muted">
-            <Clock className="size-6 text-muted-foreground" />
+          <div className="p-2 rounded-lg bg-muted text-muted-foreground">
+            <Clock className="size-5" aria-hidden="true" />
           </div>
         )}
         <div>
-          <span className="text-xs uppercase font-bold tracking-wider block text-muted-foreground">
-            {isCritical ? '¡Zona Crítica - Cierre Inminente!' : 'Tiempo Restante'}
+          <span className="text-[11px] uppercase font-semibold tracking-wider block text-muted-foreground">
+            {isCritical ? '¡Cierre Inminente!' : 'Tiempo Restante'}
           </span>
-          <span className="text-2xl font-mono font-bold tracking-tight">
+          <span className="text-2xl font-mono font-bold tracking-tight tabular-nums">
             {days > 0 && `${days}d `}
             {formatUnit(hours)}:{formatUnit(minutes)}:{formatUnit(seconds)}
           </span>
@@ -55,7 +92,7 @@ export function LiveTimer({ fechaFin, estado }) {
       </div>
 
       {isCritical && (
-        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-red-600 text-white animate-pulse">
+        <span className="text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-600 text-white">
           Último Minuto
         </span>
       )}

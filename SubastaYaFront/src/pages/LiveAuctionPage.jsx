@@ -7,7 +7,27 @@ import { LiveTimer } from '@/components/live/live-timer'
 import { BidHistory } from '@/components/live/bid-history'
 import { BiddingConsole } from '@/components/live/bidding-console'
 import { AuctionAlerts } from '@/components/live/auction-alerts'
-import { ArrowLeft, Tag, Radio } from 'lucide-react'
+import { ArrowLeft, Tag, Radio, ShieldCheck } from 'lucide-react'
+
+function LiveAuctionSkeleton() {
+  return (
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6 animate-pulse" aria-label="Cargando sala en vivo">
+      <div className="h-5 w-32 bg-muted rounded-md" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-5">
+          <div className="aspect-video w-full bg-muted rounded-xl" />
+          <div className="space-y-2">
+            <div className="h-7 w-2/3 bg-muted rounded-md" />
+            <div className="h-4 w-full bg-muted rounded-md" />
+          </div>
+          <div className="h-16 bg-muted rounded-xl" />
+          <div className="h-44 bg-muted rounded-xl" />
+        </div>
+        <div className="h-[440px] bg-muted rounded-xl" />
+      </div>
+    </div>
+  )
+}
 
 export function LiveAuctionPage({ user }) {
   const { id } = useParams()
@@ -65,7 +85,7 @@ export function LiveAuctionPage({ user }) {
         ) {
           addAlert({
             type: 'outbid',
-            message: `¡Te han superado! ${newBid.compradorSeudonimo || 'Otro postor'} acaba de ofertar $${newBid.monto}.`,
+            message: `¡Te han superado! ${newBid.compradorSeudonimo || 'Otro postor'} ofertó $${newBid.monto}.`,
           })
         }
         return [newBid, ...prev.filter((b) => b.pujaId !== newBid.pujaId)]
@@ -94,8 +114,7 @@ export function LiveAuctionPage({ user }) {
       setAuction((prev) => (prev ? { ...prev, fechaFin: nuevaFecha || prev.fechaFin } : prev))
       addAlert({
         type: 'antisniping',
-        message:
-          '¡Regla Anti-Sniping! La subasta se ha extendido 2 minutos adicionales debido a una oferta de último momento.',
+        message: '¡Regla Anti-Sniping! La subasta se extendió 2 minutos adicionales.',
       })
     },
     [addAlert]
@@ -125,7 +144,7 @@ export function LiveAuctionPage({ user }) {
         type: isWinner ? 'success' : 'info',
         message: isWinner
           ? `¡Felicitaciones! Has ganado la subasta por $${finalAmount}.`
-          : `La subasta ha finalizado. Ganador: Postor #${winnerId} por $${finalAmount}.`,
+          : `Subasta finalizada. Ganador: Postor #${winnerId} por $${finalAmount}.`,
       })
     },
     [user, addAlert]
@@ -135,7 +154,7 @@ export function LiveAuctionPage({ user }) {
     setAuction((prev) => (prev ? { ...prev, estado: 'Desierta' } : prev))
     addAlert({
       type: 'info',
-      message: 'La subasta ha finalizado sin ofertas (Desierta).',
+      message: 'La subasta finalizó sin ofertas (Desierta).',
     })
   }, [addAlert])
 
@@ -159,26 +178,19 @@ export function LiveAuctionPage({ user }) {
   const { isConnected } = useAuctionHub(id, hubCallbacks)
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <div className="flex flex-col items-center gap-2">
-          <span className="size-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-          <span className="text-muted-foreground font-medium text-sm">Cargando sala en vivo...</span>
-        </div>
-      </div>
-    )
+    return <LiveAuctionSkeleton />
   }
 
   if (!auction) {
     return (
       <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-xl border p-6">
-        <h2 className="text-lg font-semibold">Subasta no encontrada</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h2 className="text-base font-semibold">Subasta no encontrada</h2>
+        <p className="text-xs text-muted-foreground mt-1">
           No se pudo recuperar la información del lote solicitado.
         </p>
         <Link
           to="/subastas"
-          className="text-primary font-medium underline mt-4 inline-block text-sm"
+          className="text-primary font-medium underline mt-4 inline-block text-xs focus-visible:outline-2"
         >
           Volver al catálogo
         </Link>
@@ -190,48 +202,59 @@ export function LiveAuctionPage({ user }) {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <nav aria-label="Navegación secundaria" className="flex items-center justify-between">
         <Link
           to="/subastas"
-          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft className="size-4" aria-hidden="true" />
           Volver al catálogo
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-2"
+        >
           <span
-            className={`size-2.5 rounded-full ${
-              isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+            className={`size-2 rounded-full ${
+              isConnected ? 'bg-emerald-500 animate-pulse motion-reduce:animate-none' : 'bg-amber-500'
             }`}
+            aria-hidden="true"
           />
-          <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-            <Radio className={`size-3 ${isConnected ? 'text-emerald-500' : 'text-amber-500'}`} />
-            {isConnected ? 'SALA EN VIVO CONECTADA' : 'CONECTANDO...'}
+          <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+            <Radio className={`size-3 ${isConnected ? 'text-emerald-500' : 'text-amber-500'}`} aria-hidden="true" />
+            {isConnected ? 'SALA CONECTADA' : 'CONECTANDO...'}
           </span>
         </div>
-      </div>
+      </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="relative aspect-video rounded-xl overflow-hidden border bg-muted shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <article className="lg:col-span-2 space-y-5">
+          <div className="relative aspect-video rounded-xl overflow-hidden border bg-muted shadow-xs">
             <img
               src={
                 auction.urlImagen ||
                 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&auto=format&fit=crop&q=80'
               }
-              alt={auction.titulo}
+              alt={`Imagen de lote: ${auction.titulo}`}
               className="w-full h-full object-cover"
             />
-            <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-xs">
-              <Tag className="size-3.5" />
+            <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-xs">
+              <Tag className="size-3" aria-hidden="true" />
               {auction.categoriaNombre}
             </div>
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">{auction.titulo}</h1>
-            <p className="text-muted-foreground text-sm mt-1.5 leading-relaxed">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <h1 className="text-xl font-bold tracking-tight text-foreground">{auction.titulo}</h1>
+              <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                Subasta Verificada
+              </span>
+            </div>
+            <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
               {auction.descripcion}
             </p>
           </div>
@@ -250,15 +273,15 @@ export function LiveAuctionPage({ user }) {
             onBidSuccess={(bid) => {
               addAlert({
                 type: 'success',
-                message: `¡Puja confirmada por $${bid.monto}! Ahora estás liderando la subasta.`,
+                message: `¡Puja confirmada por $${bid.monto}! Estás liderando la subasta.`,
               })
             }}
           />
-        </div>
+        </article>
 
-        <div className="space-y-6">
+        <aside className="space-y-6 lg:sticky lg:top-6">
           <BidHistory bids={bids} currentUserId={user?.id} />
-        </div>
+        </aside>
       </div>
 
       <AuctionAlerts alerts={alerts} />

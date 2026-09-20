@@ -167,8 +167,8 @@ export function CatalogPage({ initialEstado = "todos" }) {
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
       {initialEstado === "Activa" && (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
-          <span className="relative flex h-3 w-3 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative flex h-3 w-3 shrink-0" aria-hidden="true">
+            <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
           </span>
           <div>
@@ -235,22 +235,30 @@ export function CatalogPage({ initialEstado = "todos" }) {
 
           {/* Rango de Precios */}
           <div className="flex items-center gap-1.5">
+            <label htmlFor="catalog-precio-min" className="sr-only">
+              Precio mínimo
+            </label>
             <Input
+              id="catalog-precio-min"
               type="number"
               min="0"
               placeholder="Mín $"
               value={precioMinInput}
               onChange={(e) => setPrecioMinInput(e.target.value)}
-              className="h-9 w-24"
+              className="h-9 w-24 tabular-nums"
             />
-            <span className="text-muted-foreground text-xs">-</span>
+            <span className="text-muted-foreground text-xs" aria-hidden="true">-</span>
+            <label htmlFor="catalog-precio-max" className="sr-only">
+              Precio máximo
+            </label>
             <Input
+              id="catalog-precio-max"
               type="number"
               min="0"
               placeholder="Máx $"
               value={precioMaxInput}
               onChange={(e) => setPrecioMaxInput(e.target.value)}
-              className="h-9 w-24"
+              className="h-9 w-24 tabular-nums"
             />
           </div>
 
