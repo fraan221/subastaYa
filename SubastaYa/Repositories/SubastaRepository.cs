@@ -30,15 +30,21 @@ public class SubastaRepository : ISubastaRepository
         _context.Subastas.Add(subasta);
     }
 
+    public void AgregarAuditoria(AuditoriaLog auditoria)
+    {
+        _context.AuditoriaLogs.Add(auditoria);
+    }
+
     public async Task GuardarCambiosAsync()
     {
         await _context.SaveChangesAsync();
     }
 
     public async Task<(List<Subasta> Items, int TotalCount)> ListarSubastasAsync(
-        int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda)
+        int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda,
+        decimal? precioMin = null, decimal? precioMax = null, string? ordenamiento = null)
     {
-        var query = _context.Subastas.AsQueryable();
+        var query = _context.Subastas.AsNoTracking().AsQueryable();
 
         if (estado.HasValue)
         {
@@ -56,10 +62,26 @@ public class SubastaRepository : ISubastaRepository
             query = query.Where(s => s.Titulo.ToLower().Contains(busquedaLower));
         }
 
+        if (precioMin.HasValue)
+        {
+            query = query.Where(s => s.PrecioBase >= precioMin.Value);
+        }
+
+        if (precioMax.HasValue)
+        {
+            query = query.Where(s => s.PrecioBase <= precioMax.Value);
+        }
+
         var totalCount = await query.CountAsync();
 
+        query = ordenamiento?.ToLower() switch
+        {
+            "tiempo" => query.OrderBy(s => s.FechaFin),
+            "mayor_puja" => query.OrderByDescending(s => s.Pujas.Any() ? s.Pujas.Max(p => p.Monto) : s.PrecioBase),
+            _ => query.OrderByDescending(s => s.FechaFin)
+        };
+
         var items = await query
-            .OrderByDescending(s => s.FechaFin)
             .Skip((pagina - 1) * tamaño)
             .Take(tamaño)
             .Include(s => s.Categoria)

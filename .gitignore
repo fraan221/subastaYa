@@ -4,8 +4,10 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 
-# Rider / IntelliJ IDEs
+# Tooling and IDE caches
 .idea/
+.agents/
+skills-lock.json
 
 # User-specific files
 *.user
@@ -23,3 +25,15 @@ Thumbs.db
 
 # Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+.env
+.env.*
+!.env.example
+*.local
