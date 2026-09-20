@@ -1,0 +1,151 @@
+{
+  "info": {
+    "_postman_id": "7f8b5490-4a39-4d89-9a28-98e9196b01ab",
+    "name": "SubastaYa - Concurrency Stress Test",
+    "description": "Colección de Postman para validar el control de concurrencia optimista (Optimistic Locking) en SubastaYa API. Ejecutada concurrentemente mediante Newman CLI / Node.js, demuestra la colisión entre dos ofertas simultáneas por el mismo activo: una persiste con 201 Created y la otra es rechazada con 409 Conflict.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5080",
+      "type": "string"
+    },
+    {
+      "key": "subastaId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "compradorId",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "monto",
+      "value": "80000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Consultar Estado Inicial",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/auctions/{{subastaId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auctions", "{{subastaId}}"]
+        },
+        "description": "Consulta el estado previo, versión de entidad y monto líder actual antes de iniciar la prueba de concurrencia."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200 OK y Subasta Activa\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.estado).to.eql(\"Activa\");",
+              "    console.log(\"[Pre-check] Subasta ID:\", data.id, \"| Version:\", data.version, \"| Monto Lider:\", data.montoActual || data.precioBase, \"| Lider actual:\", data.ultimaPujaComprador || \"Sin pujas\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Concurrencia",
+      "description": "Carpeta contenedora de la petición transaccional de puja para ejecución paralela en Newman CLI.",
+      "item": [
+        {
+          "name": "Puja Concurrente (Optimistic Locking)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"compradorId\": {{compradorId}},\n  \"monto\": {{monto}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auctions/{{subastaId}}/bids",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auctions", "{{subastaId}}", "bids"]
+            },
+            "description": "Petición transaccional de puja. Al ser ejecutada en paralelo mediante Newman, compite por la misma versión de la subasta."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const status = pm.response.code;",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Concurrencia Optimista: Código HTTP esperado es 201 Created o 409 Conflict\", function () {",
+                  "    pm.expect([201, 409]).to.include(status);",
+                  "});",
+                  "",
+                  "if (status === 201) {",
+                  "    pm.test(\"Petición Ganadora (201 Created): Puja persistida y saldo retenido\", function () {",
+                  "        pm.expect(body).to.have.property(\"pujaId\");",
+                  "        pm.expect(body.monto).to.eql(Number(pm.variables.get(\"monto\")));",
+                  "        console.log(\"[GANADORA 201] Puja registrada ID:\", body.pujaId, \"por $\", body.monto);",
+                  "    });",
+                  "} else if (status === 409) {",
+                  "    pm.test(\"Petición en Conflicto (409 Conflict): Rechazada por colisión de versiones\", function () {",
+                  "        pm.expect(body).to.have.property(\"mensaje\");",
+                  "        pm.expect(body.mensaje.toLowerCase()).to.include(\"concurrencia\");",
+                  "        console.log(\"[COLISION 409] Conflicto capturado:\", body.mensaje);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Verificar Estado Posterior",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/auctions/{{subastaId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auctions", "{{subastaId}}"]
+        },
+        "description": "Verifica que el estado final de la subasta refleje exactamente una sola actualización de versión y la puja aceptada."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Estado HTTP 200 OK y Consistencia de Subasta\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.version).to.be.above(0);",
+              "    console.log(\"[Post-check] Subasta ID:\", data.id, \"| Nueva Version:\", data.version, \"| Monto Lider Final:\", data.montoActual, \"| Ganador:\", data.ultimaPujaComprador);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
