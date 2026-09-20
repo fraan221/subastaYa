@@ -218,7 +218,7 @@ export function LiveAuctionPage({ user }) {
         >
           <span
             className={`size-2 rounded-full ${
-              isConnected ? 'bg-emerald-500 animate-pulse motion-reduce:animate-none' : 'bg-amber-500'
+              isConnected ? 'bg-emerald-500' : 'bg-amber-500'
             }`}
             aria-hidden="true"
           />

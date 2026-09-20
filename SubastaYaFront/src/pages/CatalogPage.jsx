@@ -167,10 +167,7 @@ export function CatalogPage({ initialEstado = "todos" }) {
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
       {initialEstado === "Activa" && (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
-          <span className="relative flex h-3 w-3 shrink-0" aria-hidden="true">
-            <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-          </span>
+          <span className="size-2.5 rounded-full bg-emerald-500 shrink-0" aria-hidden="true" />
           <div>
             <h2 className="font-semibold text-sm">Salas de Subastas en Tiempo Real</h2>
             <p className="text-xs text-muted-foreground">

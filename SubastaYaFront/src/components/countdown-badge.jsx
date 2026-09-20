@@ -65,7 +65,7 @@ export function CountdownBadge({ fechaFin, fechaInicio, estado }) {
     return (
       <Badge
         variant="destructive"
-        className="font-mono text-xs animate-pulse font-semibold"
+        className="font-mono text-xs tabular-nums font-semibold"
       >
         <ClockIcon data-icon="inline-start" className="size-3.5" />
         {formattedTime} (¡Último minuto!)

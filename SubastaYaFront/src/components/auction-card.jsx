@@ -26,7 +26,7 @@ export function AuctionCard({ auction }) {
           src={imageFailed || !auction.urlImagen ? fallbackImage : auction.urlImagen}
           alt={auction.titulo}
           onError={() => setImageFailed(true)}
-          className="aspect-video w-full object-cover transition-transform duration-300 hover:scale-105"
+          className="aspect-video w-full object-cover"
           loading="lazy"
         />
       </Link>
@@ -66,7 +66,7 @@ export function AuctionCard({ auction }) {
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <Link to={`/subastas/${auction.id}/live`}>
-              <Radio className="size-4 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+              <Radio className="size-4" aria-hidden="true" />
               Entrar a Sala en Vivo
             </Link>
           </Button>

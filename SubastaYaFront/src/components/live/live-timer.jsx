@@ -73,7 +73,7 @@ export function LiveTimer({ fechaFin, estado }) {
       <div className="flex items-center gap-3">
         {isCritical ? (
           <div className="p-2 rounded-lg bg-red-500/20 text-red-600 dark:text-red-400">
-            <AlertTriangle className="size-5 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+            <AlertTriangle className="size-5" aria-hidden="true" />
           </div>
         ) : (
           <div className="p-2 rounded-lg bg-muted text-muted-foreground">
