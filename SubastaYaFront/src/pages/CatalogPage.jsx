@@ -34,7 +34,7 @@ const ORDENAMIENTOS = [
   { value: "mayor_puja", label: "Mayor oferta" },
 ];
 
-export function CatalogPage() {
+export function CatalogPage({ initialEstado = "todos" }) {
   const [auctions, setAuctions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +48,10 @@ export function CatalogPage() {
   ];
 
   // Filtros simplificados
-  const [estado, setEstado] = useState("todos");
+  const [estado, setEstado] = useState(initialEstado);
   const [categoriaId, setCategoriaId] = useState("todas");
+  const [precioMinInput, setPrecioMinInput] = useState("");
+  const [precioMaxInput, setPrecioMaxInput] = useState("");
   const [precioMin, setPrecioMin] = useState("");
   const [precioMax, setPrecioMax] = useState("");
   const [ordenamiento, setOrdenamiento] = useState("recientes");
@@ -57,6 +59,16 @@ export function CatalogPage() {
   // Paginación
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+
+  // Debounce para precio
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPrecioMin(precioMinInput);
+      setPrecioMax(precioMaxInput);
+      setPagina(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [precioMinInput, precioMaxInput]);
 
   // Cargar categorías disponibles (una sola vez)
   useEffect(() => {
@@ -133,8 +145,10 @@ export function CatalogPage() {
 
   // Resetear filtros
   const handleResetFilters = () => {
-    setEstado("todos");
+    setEstado(initialEstado);
     setCategoriaId("todas");
+    setPrecioMinInput("");
+    setPrecioMaxInput("");
     setPrecioMin("");
     setPrecioMax("");
     setOrdenamiento("recientes");
@@ -142,10 +156,10 @@ export function CatalogPage() {
   };
 
   const hasActiveFilters =
-    estado !== "todos" ||
+    estado !== initialEstado ||
     categoriaId !== "todas" ||
-    precioMin !== "" ||
-    precioMax !== "" ||
+    precioMinInput !== "" ||
+    precioMaxInput !== "" ||
     ordenamiento !== "recientes";
 
   return (
@@ -205,28 +219,32 @@ export function CatalogPage() {
 
           {/* Rango de Precios */}
           <div className="flex items-center gap-1.5">
+            <label htmlFor="catalog-precio-min" className="sr-only">
+              Precio mínimo
+            </label>
             <Input
+              id="catalog-precio-min"
               type="number"
               min="0"
               placeholder="Mín $"
-              value={precioMin}
-              onChange={(e) => {
-                setPrecioMin(e.target.value);
-                setPagina(1);
-              }}
-              className="h-9 w-24"
+              value={precioMinInput}
+              onChange={(e) => setPrecioMinInput(e.target.value)}
+              className="h-9 w-24 tabular-nums"
             />
-            <span className="text-muted-foreground text-xs">-</span>
+            <span className="text-muted-foreground text-xs" aria-hidden="true">
+              -
+            </span>
+            <label htmlFor="catalog-precio-max" className="sr-only">
+              Precio máximo
+            </label>
             <Input
+              id="catalog-precio-max"
               type="number"
               min="0"
               placeholder="Máx $"
-              value={precioMax}
-              onChange={(e) => {
-                setPrecioMax(e.target.value);
-                setPagina(1);
-              }}
-              className="h-9 w-24"
+              value={precioMaxInput}
+              onChange={(e) => setPrecioMaxInput(e.target.value)}
+              className="h-9 w-24 tabular-nums"
             />
           </div>
 

@@ -9,15 +9,39 @@ using SubastaYa.Services.Interfaces;
 
 namespace SubastaYa.Services;
 
+/// <summary>
+/// Proporciona la lógica de negocio para la publicación, consulta detallada
+/// y catálogo filtrado de subastas en el sistema.
+/// Implementa <see cref="ISubastaService"/>.
+/// </summary>
 public class SubastaService : ISubastaService
 {
     private readonly ISubastaRepository _subastaRepository;
 
+    /// <summary>
+    /// Inicializa una nueva instancia de <see cref="SubastaService"/>.
+    /// </summary>
+    /// <param name="subastaRepository">Repositorio para persistencia y filtrado de subastas.</param>
     public SubastaService(ISubastaRepository subastaRepository)
     {
         _subastaRepository = subastaRepository;
     }
-    //Listado de subastas
+
+    /// <summary>
+    /// Consulta el catálogo de subastas aplicando filtros de estado, categoría, búsqueda por texto,
+    /// rango de precios, ordenamiento y paginación normalizada.
+    /// </summary>
+    /// <param name="pagina">Número de página solicitada (mínimo 1).</param>
+    /// <param name="tamaño">Cantidad de elementos por página (acotado entre 1 y 50, defecto: 10).</param>
+    /// <param name="estado">Filtro opcional por estado de la subasta (<see cref="EstadoSubasta"/>).</param>
+    /// <param name="categoriaId">Identificador opcional de la categoría.</param>
+    /// <param name="busqueda">Término de búsqueda parcial sobre el título de la subasta.</param>
+    /// <param name="precioMin">Límite inferior de precio base para filtrar.</param>
+    /// <param name="precioMax">Límite superior de precio base para filtrar.</param>
+    /// <param name="ordenamiento">Criterio de ordenamiento (ej. fecha, precio).</param>
+    /// <returns>
+    /// Una estructura paginada (<see cref="PaginacionResponse{T}"/>) con elementos <see cref="SubastaListadoResponse"/>.
+    /// </returns>
     public async Task<PaginacionResponse<SubastaListadoResponse>> ListarSubastasAsync(
         int pagina, int tamaño, EstadoSubasta? estado, int? categoriaId, string? busqueda,
         decimal? precioMin = null, decimal? precioMax = null, string? ordenamiento = null)
@@ -56,6 +80,15 @@ public class SubastaService : ISubastaService
         };
     }
 
+    /// <summary>
+    /// Obtiene la ficha técnica completa de una subasta por su identificador único,
+    /// incluyendo información del vendedor, categoría y la puja líder actual.
+    /// </summary>
+    /// <param name="id">Identificador único de la subasta.</param>
+    /// <returns>Detalle consolidado en un <see cref="SubastaDetalleResponse"/>.</returns>
+    /// <exception cref="NotFoundException">
+    /// Se lanza cuando no existe ninguna subasta con el <paramref name="id"/> especificado.
+    /// </exception>
     public async Task<SubastaDetalleResponse> ObtenerSubastaAsync(int id)
     {
         var subasta = await _subastaRepository.ObtenerSubastaAsync(id);
@@ -81,6 +114,7 @@ public class SubastaService : ISubastaService
             FechaFin = subasta.FechaFin,
             Estado = subasta.Estado.ToString(),
             Version = subasta.Version,
+            VendedorId = subasta.VendedorId,
             VendedorNombre = subasta.Vendedor.Nombre,
             CategoriaNombre = subasta.Categoria.Nombre,
             CantidadPujas = subasta.Pujas.Count,
@@ -90,6 +124,19 @@ public class SubastaService : ISubastaService
         };
     }
 
+    /// <summary>
+    /// Crea y programa una nueva subasta en el sistema previa validación de existencia de vendedor,
+    /// categoría y consistencia temporal de las fechas de inicio y cierre.
+    /// </summary>
+    /// <param name="request">Datos requeridos para dar de alta la subasta.</param>
+    /// <returns>Datos de la subasta recién creada en un <see cref="SubastaResponse"/>.</returns>
+    /// <exception cref="NotFoundException">
+    /// Se lanza si el vendedor especificado o la categoría seleccionada no existen.
+    /// </exception>
+    /// <exception cref="BusinessRuleException">
+    /// Se lanza si la fecha de inicio es anterior a la fecha y hora actual (UTC),
+    /// o si la fecha de fin no es estrictamente posterior a la de inicio.
+    /// </exception>
     public async Task<SubastaResponse> CrearSubastaAsync(CrearSubastaRequest request)
     {
         // 1. Validar existencia del vendedor
@@ -137,9 +184,6 @@ public class SubastaService : ISubastaService
 
         _subastaRepository.AgregarSubasta(subasta);
 
-        // 5. Persistir
-        await _subastaRepository.GuardarCambiosAsync();
-
         var auditoria = new AuditoriaLog
         {
             Entidad = nameof(Subasta),
@@ -158,7 +202,9 @@ public class SubastaService : ISubastaService
             Fecha = DateTime.UtcNow
         };
         _subastaRepository.AgregarAuditoria(auditoria);
-        await  _subastaRepository.GuardarCambiosAsync();
+
+        // 5. Persistir de forma atómica
+        await _subastaRepository.GuardarCambiosAsync();
 
         // 6. Retornar respuesta
         return new SubastaResponse

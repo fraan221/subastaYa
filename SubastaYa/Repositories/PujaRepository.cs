@@ -22,6 +22,24 @@ public class PujaRepository : IPujaRepository
             .FirstOrDefaultAsync(s => s.Id == subastaId);
     }
 
+    public async Task<List<Puja>> ObtenerHistorialPorSubastaAsync(int subastaId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Pujas
+            .Include(p => p.Comprador)
+            .Where(p => p.SubastaId == subastaId)
+            .OrderByDescending(p => p.FechaPuja)
+            .ThenByDescending(p => p.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> ContarExtensionesAntiSnipingAsync(int subastaId, CancellationToken cancellationToken = default)
+    {
+        return await _context.AuditoriaLogs
+            .CountAsync(a => a.Entidad == nameof(Subasta)
+                          && a.EntidadId == subastaId
+                          && a.Accion == "AntiSniping", cancellationToken);
+    }
+
     public async Task<Billetera?> ObtenerBilleteraPorUsuarioAsync(int usuarioId)
     {
         return await _context.Billeteras

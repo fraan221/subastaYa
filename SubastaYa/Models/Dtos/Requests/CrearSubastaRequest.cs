@@ -4,8 +4,6 @@ namespace SubastaYa.Models.Dtos.Requests;
 
 public class CrearSubastaRequest
 {
-    [Required(ErrorMessage = "El ID del vendedor es obligatorio.")]
-    [Range(1, int.MaxValue, ErrorMessage = "El ID del vendedor debe ser mayor a 0.")]
     public int VendedorId { get; set; }
 
     [Required(ErrorMessage = "El ID de la categoría es obligatorio.")]

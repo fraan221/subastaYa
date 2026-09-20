@@ -29,7 +29,7 @@ public class AuctionFinalizationWorker : BackgroundService
         {
             try
             {
-                await ProcesarSubastasVencidas(stoppingToken);
+                await ProcesarSubastasVencidasAsync(stoppingToken);
             }
             catch (Exception ex)
             {
@@ -40,7 +40,7 @@ public class AuctionFinalizationWorker : BackgroundService
         }
     }
 
-    private async Task ProcesarSubastasVencidas(CancellationToken ct)
+    private async Task ProcesarSubastasVencidasAsync(CancellationToken ct)
     {
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -67,12 +67,12 @@ public class AuctionFinalizationWorker : BackgroundService
             {
                 if (subasta.Pujas.Any())
                 {
-                    await ProcesarSubastaConGanador(
+                    await ProcesarSubastaConGanadorAsync(
                         subasta, hubContext, ahora, context, ct);
                 }
                 else
                 {
-                    await ProcesarSubastaDesierta(
+                    await ProcesarSubastaDesiertaAsync(
                         subasta, hubContext, ahora, context, ct);
                 }
             }
@@ -133,7 +133,7 @@ public class AuctionFinalizationWorker : BackgroundService
         }
     }
 
-    private async Task ProcesarSubastaConGanador(
+    private async Task ProcesarSubastaConGanadorAsync(
         Subasta subasta,
         IHubContext<AuctionHub> hubContext,
         DateTime ahora,
@@ -227,7 +227,7 @@ public class AuctionFinalizationWorker : BackgroundService
             subasta.Id, pujaGanadora.CompradorId, pujaGanadora.Monto);
     }
 
-    private async Task ProcesarSubastaDesierta(
+    private async Task ProcesarSubastaDesiertaAsync(
         Subasta subasta,
         IHubContext<AuctionHub> hubContext,
         DateTime ahora,

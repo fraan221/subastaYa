@@ -32,7 +32,6 @@ const navItems = [
       {
         title: "En Vivo",
         url: "/subastas/en-vivo",
-        disabled: true,
       },
     ],
   },

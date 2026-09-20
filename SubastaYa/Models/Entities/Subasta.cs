@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using SubastaYa.Models.Enums;
 
 namespace SubastaYa.Models.Entities;
@@ -16,7 +16,7 @@ public class Subasta
     public DateTime FechaInicio { get; set; }
     public DateTime FechaFin { get; set; }
 
-    public EstadoSubasta Estado;
+    public EstadoSubasta Estado { get; set; }
     [ConcurrencyCheck]
     public int Version { get; set; }
 
