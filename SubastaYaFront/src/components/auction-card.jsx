@@ -5,7 +5,9 @@ import {
   CardHeader,
 } from "@/components/ui/card"
 import { CountdownBadge } from "@/components/countdown-badge"
-import { TagIcon } from "lucide-react"
+import { TagIcon, Radio } from "lucide-react"
+import { Link } from "react-router-dom"
+import { Button } from "@/components/ui/button"
 
 export function AuctionCard({ auction }) {
   const [imageFailed, setImageFailed] = useState(false)
@@ -18,14 +20,16 @@ export function AuctionCard({ auction }) {
   }).format(currentPrice)
 
   return (
-    <Card>
-      <img
-        src={imageFailed || !auction.urlImagen ? fallbackImage : auction.urlImagen}
-        alt={auction.titulo}
-        onError={() => setImageFailed(true)}
-        className="aspect-video w-full overflow-hidden object-cover rounded-xl rounded-b-none"
-        loading="lazy"
-      />
+    <Card className="hover:shadow-md transition-shadow">
+      <Link to={`/subastas/${auction.id}/live`} className="block overflow-hidden rounded-t-xl">
+        <img
+          src={imageFailed || !auction.urlImagen ? fallbackImage : auction.urlImagen}
+          alt={auction.titulo}
+          onError={() => setImageFailed(true)}
+          className="aspect-video w-full object-cover transition-transform duration-300 hover:scale-105"
+          loading="lazy"
+        />
+      </Link>
 
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -39,12 +43,14 @@ export function AuctionCard({ auction }) {
             estado={auction.estado}
           />
         </div>
-        <h3 className="font-semibold text-base">
-          {auction.titulo}
-        </h3>
+        <Link to={`/subastas/${auction.id}/live`} className="hover:underline">
+          <h3 className="font-semibold text-base">
+            {auction.titulo}
+          </h3>
+        </Link>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="space-y-3">
         <div className="flex flex-col">
           <span className="text-xs text-muted-foreground font-medium">
             {auction.cantidadPujas > 0 ? "Oferta más alta:" : "Precio base inicial:"}
@@ -53,6 +59,28 @@ export function AuctionCard({ auction }) {
             {formattedPrice}
           </span>
         </div>
+
+        {auction.estado === "Activa" ? (
+          <Button
+            asChild
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+          >
+            <Link to={`/subastas/${auction.id}/live`}>
+              <Radio className="size-4 animate-pulse" />
+              Entrar a Sala en Vivo
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            asChild
+            variant="outline"
+            className="w-full font-medium flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Link to={`/subastas/${auction.id}/live`}>
+              Ver Sala de Subasta
+            </Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   )

@@ -9,15 +9,28 @@ using SubastaYa.Services.Interfaces;
 
 namespace SubastaYa.Services;
 
+/// <summary>
+/// Proporciona la lógica de negocio para la gestión financiera de los usuarios,
+/// administrando depósitos, consulta de saldos y trazabilidad contable mediante ledger y auditoría.
+/// Implementa <see cref="IBilleteraService"/>.
+/// </summary>
 public class BilleteraService : IBilleteraService
 {
     private readonly IBilleteraRepository _billeteraRepository;
 
+    /// <summary>
+    /// Inicializa una nueva instancia de <see cref="BilleteraService"/>.
+    /// </summary>
+    /// <param name="billeteraRepository">Repositorio para persistencia y consulta de billeteras y movimientos contables.</param>
     public BilleteraService(IBilleteraRepository billeteraRepository)
     {
         _billeteraRepository = billeteraRepository;
     }
 
+    /// <summary>
+    /// Obtiene el balance financiero de todas las billeteras registradas en el sistema.
+    /// </summary>
+    /// <returns>Lista de <see cref="BalanceResponse"/> con el desglose de saldos por usuario.</returns>
     public async Task<List<BalanceResponse>> ObtenerBalanceAsync()
     {
         var billeteras = await _billeteraRepository.ObtenerTodosAsync();
@@ -32,6 +45,18 @@ public class BilleteraService : IBilleteraService
         }).ToList();
     }
 
+    /// <summary>
+    /// Procesa una acreditación de fondos (depósito) en la billetera de un usuario,
+    /// registrando la transacción en el ledger y generando una traza de auditoría.
+    /// </summary>
+    /// <param name="request">Datos del depósito que incluyen el identificador del usuario y el monto a acreditar.</param>
+    /// <returns>El estado actualizado del balance del usuario en un <see cref="BalanceResponse"/>.</returns>
+    /// <exception cref="BusinessRuleException">
+    /// Se lanza cuando el monto ingresado es menor o igual a cero.
+    /// </exception>
+    /// <exception cref="NotFoundException">
+    /// Se lanza cuando no se encuentra la billetera asociada al usuario indicado.
+    /// </exception>
     public async Task<BalanceResponse> DepositarAsync(DepositarRequest request)
     {
         if (request.Monto <= 0)
@@ -93,6 +118,14 @@ public class BilleteraService : IBilleteraService
         };
     }
 
+    /// <summary>
+    /// Consulta el saldo total, disponible y retenido de la billetera de un usuario específico.
+    /// </summary>
+    /// <param name="usuarioId">Identificador único del usuario titular.</param>
+    /// <returns>Un <see cref="BalanceResponse"/> con el desglose financiero del usuario.</returns>
+    /// <exception cref="NotFoundException">
+    /// Se lanza cuando no existe una billetera vinculada al <paramref name="usuarioId"/>.
+    /// </exception>
     public async Task<BalanceResponse> ObtenerBalancePorUsuarioIdAsync(int usuarioId)
     {
         var billetera = await _billeteraRepository.ObtenerPorUsuarioIdAsync(usuarioId);
@@ -111,6 +144,11 @@ public class BilleteraService : IBilleteraService
         };
     }
 
+    /// <summary>
+    /// Obtiene el historial cronológico de transacciones contables registradas en la billetera de un usuario.
+    /// </summary>
+    /// <param name="usuarioId">Identificador único del usuario titular.</param>
+    /// <returns>Lista de <see cref="TransaccionResponse"/> con los movimientos registrados.</returns>
     public async Task<List<TransaccionResponse>> ObtenerTransaccionesPorUsuarioIdAsync(int usuarioId)
     {
         var transacciones = await _billeteraRepository.ObtenerTransaccionesPorUsuarioIdAsync(usuarioId);

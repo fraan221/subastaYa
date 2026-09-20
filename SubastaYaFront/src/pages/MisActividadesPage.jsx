@@ -50,10 +50,6 @@ export function MisActividadesPage({ type }) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    setPagina(1);
-  }, [type]);
-
-  useEffect(() => {
     let ignore = false;
 
     async function loadActivities() {

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SubastaYa.Exceptions;
 using SubastaYa.Models.Dtos.Requests;
@@ -8,6 +10,7 @@ using SubastaYa.Services.Interfaces;
 namespace SubastaYa.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/auctions")]
 public class AuctionsController : ControllerBase
 {
@@ -88,6 +91,7 @@ public class AuctionsController : ControllerBase
     {
         try
         {
+            request.VendedorId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var resultado = await _subastaService.CrearSubastaAsync(request);
             return StatusCode(StatusCodes.Status201Created, resultado);
         }
@@ -110,6 +114,7 @@ public class AuctionsController : ControllerBase
     {
         try
         {
+            request.CompradorId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var resultado = await _pujaService.RealizarPujaAsync(id, request);
             return StatusCode(StatusCodes.Status201Created, resultado);
         }
@@ -124,6 +129,22 @@ public class AuctionsController : ControllerBase
         catch (ConcurrencyConflictException ex)
         {
             return Conflict(new { mensaje = ex.Message });
+        }
+    }
+
+    [HttpGet("{id:int}/bids")]
+    [ProducesResponseType(typeof(List<PujaHistorialResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerHistorialPujas(int id)
+    {
+        try
+        {
+            var resultado = await _pujaService.ObtenerHistorialPujasAsync(id);
+            return Ok(resultado);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
         }
     }
 }

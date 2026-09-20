@@ -11,6 +11,7 @@ import { LoginForm } from "@/components/login-form";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuctionForm } from "@/components/auction-form";
 import { CatalogPage } from "@/pages/CatalogPage";
+import { LiveAuctionPage } from "@/pages/LiveAuctionPage";
 import { MisActividadesPage } from "@/pages/MisActividadesPage";
 import { WalletBalancePage } from "@/pages/WalletBalancePage";
 import { WalletDepositPage } from "@/pages/WalletDepositPage";
@@ -43,7 +44,8 @@ const headerTitles = {
 
 function AppHeader() {
   const location = useLocation();
-  const title = headerTitles[location.pathname] || "Subastas";
+  const isLive = location.pathname.includes("/live");
+  const title = isLive ? "Sala en Vivo" : (headerTitles[location.pathname] || "Subastas");
   const section = location.pathname.startsWith("/mis-actividades")
     ? "Actividad"
     : location.pathname.startsWith("/billetera")
@@ -109,7 +111,18 @@ export default function App() {
             <main className="flex-1 overflow-y-auto">
               <Routes>
                 <Route path="/" element={<Navigate to="/subastas" replace />} />
-                <Route path="/subastas" element={<CatalogPage />} />
+                <Route
+                  path="/subastas"
+                  element={<CatalogPage key="catalog-all" />}
+                />
+                <Route
+                  path="/subastas/en-vivo"
+                  element={<CatalogPage key="catalog-live" initialEstado="Activa" />}
+                />
+                <Route
+                  path="/subastas/:id/live"
+                  element={<LiveAuctionPage user={user} />}
+                />
                 <Route
                   path="/subastas/crear"
                   element={<AuctionForm user={user} />}
@@ -120,11 +133,11 @@ export default function App() {
                 />
                 <Route
                   path="/mis-actividades/compras"
-                  element={<MisActividadesPage type="bids" />}
+                  element={<MisActividadesPage key="bids" type="bids" />}
                 />
                 <Route
                   path="/mis-actividades/publicaciones"
-                  element={<MisActividadesPage type="listings" />}
+                  element={<MisActividadesPage key="listings" type="listings" />}
                 />
                 <Route
                   path="/billetera"

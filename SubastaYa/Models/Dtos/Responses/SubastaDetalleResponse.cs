@@ -12,6 +12,7 @@ public class SubastaDetalleResponse
     public DateTime FechaFin { get; set; }
     public string Estado { get; set; } = string.Empty;
     public int Version { get; set; }
+    public int VendedorId { get; set; }
     public string VendedorNombre { get; set; } = string.Empty;
     public string CategoriaNombre { get; set; } = string.Empty;
     public int CantidadPujas { get; set; }

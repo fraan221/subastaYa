@@ -34,7 +34,7 @@ const ORDENAMIENTOS = [
   { value: "mayor_puja", label: "Mayor oferta" },
 ];
 
-export function CatalogPage() {
+export function CatalogPage({ initialEstado = "todos" }) {
   const [auctions, setAuctions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +48,10 @@ export function CatalogPage() {
   ];
 
   // Filtros simplificados
-  const [estado, setEstado] = useState("todos");
+  const [estado, setEstado] = useState(initialEstado);
   const [categoriaId, setCategoriaId] = useState("todas");
+  const [precioMinInput, setPrecioMinInput] = useState("");
+  const [precioMaxInput, setPrecioMaxInput] = useState("");
   const [precioMin, setPrecioMin] = useState("");
   const [precioMax, setPrecioMax] = useState("");
   const [ordenamiento, setOrdenamiento] = useState("recientes");
@@ -57,6 +59,17 @@ export function CatalogPage() {
   // Paginación
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+
+  // Debounce para precio
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPrecioMin(precioMinInput);
+      setPrecioMax(precioMaxInput);
+      setPagina(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [precioMinInput, precioMaxInput]);
+
 
   // Cargar categorías disponibles (una sola vez)
   useEffect(() => {
@@ -133,8 +146,10 @@ export function CatalogPage() {
 
   // Resetear filtros
   const handleResetFilters = () => {
-    setEstado("todos");
+    setEstado(initialEstado);
     setCategoriaId("todas");
+    setPrecioMinInput("");
+    setPrecioMaxInput("");
     setPrecioMin("");
     setPrecioMax("");
     setOrdenamiento("recientes");
@@ -142,14 +157,29 @@ export function CatalogPage() {
   };
 
   const hasActiveFilters =
-    estado !== "todos" ||
+    estado !== initialEstado ||
     categoriaId !== "todas" ||
-    precioMin !== "" ||
-    precioMax !== "" ||
+    precioMinInput !== "" ||
+    precioMaxInput !== "" ||
     ordenamiento !== "recientes";
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
+      {initialEstado === "Activa" && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
+          <span className="relative flex h-3 w-3 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <div>
+            <h2 className="font-semibold text-sm">Salas de Subastas en Tiempo Real</h2>
+            <p className="text-xs text-muted-foreground">
+              Participá en vivo con pujas instantáneas, alertas de superación y cronómetro anti-sniping.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Barra Simplificada de Filtros */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -209,11 +239,8 @@ export function CatalogPage() {
               type="number"
               min="0"
               placeholder="Mín $"
-              value={precioMin}
-              onChange={(e) => {
-                setPrecioMin(e.target.value);
-                setPagina(1);
-              }}
+              value={precioMinInput}
+              onChange={(e) => setPrecioMinInput(e.target.value)}
               className="h-9 w-24"
             />
             <span className="text-muted-foreground text-xs">-</span>
@@ -221,11 +248,8 @@ export function CatalogPage() {
               type="number"
               min="0"
               placeholder="Máx $"
-              value={precioMax}
-              onChange={(e) => {
-                setPrecioMax(e.target.value);
-                setPagina(1);
-              }}
+              value={precioMaxInput}
+              onChange={(e) => setPrecioMaxInput(e.target.value)}
               className="h-9 w-24"
             />
           </div>

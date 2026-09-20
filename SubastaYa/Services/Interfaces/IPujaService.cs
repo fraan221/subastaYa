@@ -6,4 +6,5 @@ namespace SubastaYa.Services.Interfaces;
 public interface IPujaService
 {
     Task<PujaResponse> RealizarPujaAsync(int subastaId, CrearPujaRequest request);
+    Task<List<PujaHistorialResponse>> ObtenerHistorialPujasAsync(int subastaId);
 }

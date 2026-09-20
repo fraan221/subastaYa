@@ -22,6 +22,15 @@ public class PujaRepository : IPujaRepository
             .FirstOrDefaultAsync(s => s.Id == subastaId);
     }
 
+    public async Task<List<Puja>> ObtenerHistorialPorSubastaAsync(int subastaId)
+    {
+        return await _context.Pujas
+            .Include(p => p.Comprador)
+            .Where(p => p.SubastaId == subastaId)
+            .OrderByDescending(p => p.FechaPuja)
+            .ToListAsync();
+    }
+
     public async Task<Billetera?> ObtenerBilleteraPorUsuarioAsync(int usuarioId)
     {
         return await _context.Billeteras
