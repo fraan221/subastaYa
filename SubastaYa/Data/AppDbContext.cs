@@ -107,7 +107,7 @@ public class AppDbContext : DbContext
             entity.Property(tl => tl.Monto).HasColumnName("monto").HasColumnType("decimal(18,2)").IsRequired();
             entity.Property(tl => tl.Fecha).HasColumnName("fecha").IsRequired();
             entity.Property(tl => tl.SubastaId).HasColumnName("subasta_id");
-            entity.HasOne(tl => tl.Billetera).WithMany().HasForeignKey(tl => tl.BilleteraId).IsRequired(false)
+            entity.HasOne(tl => tl.Billetera).WithMany().HasForeignKey(tl => tl.BilleteraId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(tl => tl.Subasta).WithMany().HasForeignKey(tl => tl.SubastaId)
                 .OnDelete(DeleteBehavior.Restrict);

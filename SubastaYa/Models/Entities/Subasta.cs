@@ -22,5 +22,5 @@ public class Subasta
 
     public Usuario Vendedor { get; set; } = null!;
     public Categoria Categoria { get; set; } = null!;
-    public ICollection<Puja> Pujas { get; set; } = null!;
+    public ICollection<Puja> Pujas { get; set; } = new List<Puja>();
 }
