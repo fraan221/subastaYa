@@ -1,35 +1,32 @@
-import { Shield, Trophy, Clock } from 'lucide-react'
+import { Shield, Trophy, Clock } from "lucide-react";
 
 export function BidHistory({ bids = [], currentUserId }) {
   const formatCurrency = (val) =>
-    new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
+    new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
       maximumFractionDigits: 0,
-    }).format(val)
+    }).format(val);
 
   const formatTime = (dateStr) => {
-    if (!dateStr) return '--:--:--'
-    const d = new Date(dateStr)
-    return d.toLocaleTimeString('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-  }
+    if (!dateStr) return "--:--:--";
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
 
   return (
     <section
       aria-label="Historial de ofertas en vivo"
-      className="flex flex-col h-full bg-card rounded-xl border p-4 shadow-xs"
+      className="flex flex-col rounded-xl border p-4 shadow-xs"
     >
-      <div className="flex items-center justify-between pb-3 border-b">
-        <h3 className="font-semibold text-sm flex items-center gap-2">
-          <Trophy className="size-4 text-amber-500" aria-hidden="true" />
-          Historial de Ofertas
-        </h3>
+      <div className="flex items-center justify-between pb-2 border-b">
+        <h3 className="font-semibold text-base">Historial</h3>
         <span className="text-xs text-muted-foreground font-medium">
-          {bids.length} {bids.length === 1 ? 'oferta' : 'ofertas'}
+          {bids.length} {bids.length === 1 ? "oferta" : "ofertas"}
         </span>
       </div>
 
@@ -37,50 +34,54 @@ export function BidHistory({ bids = [], currentUserId }) {
         role="log"
         aria-live="polite"
         aria-relevant="additions text"
-        className="flex-1 overflow-y-auto mt-3 space-y-2 max-h-[460px] pr-1"
+        className="flex items-center justify-center w-full"
       >
         {bids.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground text-xs flex flex-col items-center">
-            <div className="p-2.5 rounded-full bg-muted mb-2">
+          <div className="text-center text-muted-foreground text-xs flex flex-col items-center py-6">
+            <div className="p-2 rounded-full bg-muted my-2">
               <Shield className="size-5 opacity-50" aria-hidden="true" />
             </div>
-            <p className="font-medium text-foreground">Aún no hay ofertas registradas</p>
-            <p className="text-muted-foreground mt-0.5">Sé el primero en posicionarte como líder.</p>
+            <p className="font-medium text-foreground">
+              Aún no hay ofertas registradas
+            </p>
           </div>
         ) : (
-          <ol className="space-y-2 list-none p-0 m-0">
+          <ol className="w-full flex flex-col items-center justify-center space-y-2 mt-3">
             {bids.map((bid, index) => {
-              const isMe = currentUserId && bid.compradorId === currentUserId
-              const isHighest = index === 0
+              const isMe = currentUserId && bid.compradorId === currentUserId;
+              const isHighest = index === 0;
 
               return (
                 <li
-                  key={bid.pujaId || `${bid.compradorId}-${bid.fechaPuja}-${index}`}
-                  className={`flex items-center justify-between p-2.5 rounded-lg border transition-all animate-in fade-in slide-in-from-top-1 motion-reduce:animate-none ${
+                  key={
+                    bid.pujaId || `${bid.compradorId}-${bid.fechaPuja}-${index}`
+                  }
+                  className={`w-full flex items-center justify-between p-2.5 rounded-lg border ${
                     isHighest
-                      ? 'bg-emerald-500/10 border-emerald-500/30'
-                      : 'bg-muted/30 border-border/50'
+                      ? "bg-emerald-500/10 border-emerald-500/40"
+                      : "bg-card border-border"
                   }`}
                 >
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-medium text-xs">
+                      <span className="font-medium text-sm">
                         {bid.compradorSeudonimo || `Postor #${bid.compradorId}`}
                       </span>
                       {isMe && (
-                        <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-primary/20 text-primary">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary">
                           Tú
                         </span>
                       )}
                       {isHighest && (
-                        <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-emerald-600 text-white">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-600 text-white">
                           Líder
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                      <Clock className="size-3" aria-hidden="true" />
-                      <time dateTime={bid.fechaPuja}>{formatTime(bid.fechaPuja)}</time>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <time dateTime={bid.fechaPuja}>
+                        {formatTime(bid.fechaPuja)}
+                      </time>
                     </span>
                   </div>
 
@@ -88,19 +89,19 @@ export function BidHistory({ bids = [], currentUserId }) {
                     <span
                       className={`font-mono font-bold text-sm tabular-nums ${
                         isHighest
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-foreground'
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-foreground"
                       }`}
                     >
                       {formatCurrency(bid.monto)}
                     </span>
                   </div>
                 </li>
-              )
+              );
             })}
           </ol>
         )}
       </div>
     </section>
-  )
+  );
 }

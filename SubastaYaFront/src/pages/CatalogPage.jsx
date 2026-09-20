@@ -70,7 +70,6 @@ export function CatalogPage({ initialEstado = "todos" }) {
     return () => clearTimeout(timer);
   }, [precioMinInput, precioMaxInput]);
 
-
   // Cargar categorías disponibles (una sola vez)
   useEffect(() => {
     let isMounted = true;
@@ -165,18 +164,6 @@ export function CatalogPage({ initialEstado = "todos" }) {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
-      {initialEstado === "Activa" && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
-          <span className="size-2.5 rounded-full bg-emerald-500 shrink-0" aria-hidden="true" />
-          <div>
-            <h2 className="font-semibold text-sm">Salas de Subastas en Tiempo Real</h2>
-            <p className="text-xs text-muted-foreground">
-              Participá en vivo con pujas instantáneas, alertas de superación y cronómetro anti-sniping.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Barra Simplificada de Filtros */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -244,7 +231,9 @@ export function CatalogPage({ initialEstado = "todos" }) {
               onChange={(e) => setPrecioMinInput(e.target.value)}
               className="h-9 w-24 tabular-nums"
             />
-            <span className="text-muted-foreground text-xs" aria-hidden="true">-</span>
+            <span className="text-muted-foreground text-xs" aria-hidden="true">
+              -
+            </span>
             <label htmlFor="catalog-precio-max" className="sr-only">
               Precio máximo
             </label>

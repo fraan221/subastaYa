@@ -1,4 +1,5 @@
-import apiClient from './apiClient'
+import apiClient from "./apiClient";
+import { walletService } from "./walletService";
 
 export const bidService = {
   /**
@@ -11,8 +12,8 @@ export const bidService = {
     const response = await apiClient.post(`/auctions/${auctionId}/bids`, {
       compradorId,
       monto,
-    })
-    return response.data
+    });
+    return response.data;
   },
 
   /**
@@ -20,8 +21,7 @@ export const bidService = {
    * @param {number|string} userId - Identificador del usuario.
    */
   async getUserBalance(userId) {
-    const response = await apiClient.get(`/wallet/${userId}/balance`)
-    return response.data
+    return walletService.getBalance(userId);
   },
 
   /**
@@ -29,7 +29,7 @@ export const bidService = {
    * @param {number|string} auctionId - Identificador de la subasta.
    */
   async getBidHistory(auctionId) {
-    const response = await apiClient.get(`/auctions/${auctionId}/bids`)
-    return response.data
+    const response = await apiClient.get(`/auctions/${auctionId}/bids`);
+    return response.data;
   },
-}
+};
