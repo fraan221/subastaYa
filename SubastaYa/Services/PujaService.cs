@@ -27,6 +27,12 @@ public class PujaService : IPujaService
     private readonly IHubContext<AuctionHub> _hubContext;
     private readonly ILogger<PujaService> _logger;
 
+    /// <summary>
+    /// Inicializa una nueva instancia de <see cref="PujaService"/>.
+    /// </summary>
+    /// <param name="pujaRepository">Repositorio para acceso a datos de pujas, billeteras y subastas.</param>
+    /// <param name="hubContext">Contexto del hub SignalR para la difusión de eventos de subasta.</param>
+    /// <param name="logger">Instancia del registrador de eventos del sistema.</param>
     public PujaService(
         IPujaRepository pujaRepository,
         IHubContext<AuctionHub> hubContext,
@@ -64,17 +70,17 @@ public class PujaService : IPujaService
         }
         catch (BusinessRuleException ex)
         {
-            await TryLogRejection(subastaId, request, ex.Message);
+            await TryLogRejectionAsync(subastaId, request, ex.Message);
             throw;
         }
         catch (NotFoundException ex)
         {
-            await TryLogRejection(subastaId, request, ex.Message);
+            await TryLogRejectionAsync(subastaId, request, ex.Message);
             throw;
         }
         catch (ConcurrencyConflictException ex)
         {
-            await TryLogRejection(subastaId, request, ex.Message);
+            await TryLogRejectionAsync(subastaId, request, ex.Message);
             throw;
         }
     }
@@ -222,8 +228,7 @@ public class PujaService : IPujaService
         var tiempoRestante = subasta.FechaFin - ahora;
         if (tiempoRestante.TotalSeconds <= UmbralAntiSnipingSegundos)
         {
-            var extensionesPrevias = subasta.Pujas
-                .Count(p => p.FechaPuja > subasta.FechaFin.AddMinutes(-ExtensionAntiSnipingMinutos * MaxExtensionesAntiSniping));
+            var extensionesPrevias = await _pujaRepository.ContarExtensionesAntiSnipingAsync(subasta.Id);
 
             if (extensionesPrevias < MaxExtensionesAntiSniping)
             {
@@ -272,7 +277,7 @@ public class PujaService : IPujaService
         await _hubContext.Clients.Group($"auction-{subasta.Id}")
             .SendAsync("NewBid", response);
 
-        if (fueAntiSniping) // verificamos si es true.
+        if (fueAntiSniping)
         {
             await _hubContext.Clients.Group($"auction-{subasta.Id}")
                 .SendAsync("AuctionExtended", new
@@ -286,13 +291,13 @@ public class PujaService : IPujaService
     }
 
     /// <summary>
-    /// Registra en la auditoría del sistema el intento fallido de puja y notifica el rechazo
-    /// en tiempo real a los clientes conectados a la subasta.
+    /// Registra en la auditoría del sistema el intento fallido de puja de forma protegida.
     /// </summary>
     /// <param name="subastaId">Identificador de la subasta.</param>
     /// <param name="request">Datos de la puja rechazada.</param>
     /// <param name="motivo">Causa o mensaje descriptivo del rechazo.</param>
-    private async Task TryLogRejection(int subastaId, CrearPujaRequest request, string motivo)
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    private async Task TryLogRejectionAsync(int subastaId, CrearPujaRequest request, string motivo)
     {
         try
         {
@@ -327,25 +332,25 @@ public class PujaService : IPujaService
         };
         _pujaRepository.AgregarAuditoria(auditoria);
         await _pujaRepository.GuardarCambiosAsync();
-
-        await _hubContext.Clients.Group($"auction-{subastaId}")
-            .SendAsync("BidRejected", new
-            {
-                SubastaId = subastaId,
-                CompradorId = request.CompradorId,
-                Motivo = motivo
-            });
     }
 
     /// <summary>
     /// Genera un seudónimo anonimizado para proteger la identidad del comprador en la sala en vivo.
     /// </summary>
+    /// <param name="compradorId">Identificador único del postor.</param>
+    /// <returns>Seudónimo público del comprador.</returns>
     public static string GenerarSeudonimo(int compradorId) => $"Postor #{compradorId}";
 
     /// <summary>
     /// Obtiene el historial cronológico de todas las pujas realizadas en una subasta con identidad anonimizada.
     /// </summary>
-    public async Task<List<PujaHistorialResponse>> ObtenerHistorialPujasAsync(int subastaId)
+    /// <param name="subastaId">Identificador único de la subasta.</param>
+    /// <param name="cancellationToken">Token de cancelación de la operación asíncrona.</param>
+    /// <returns>Lista de pujas históricas formateadas para visualización pública.</returns>
+    /// <exception cref="NotFoundException">
+    /// Se lanza cuando no existe ninguna subasta con el <paramref name="subastaId"/> especificado.
+    /// </exception>
+    public async Task<List<PujaHistorialResponse>> ObtenerHistorialPujasAsync(int subastaId, CancellationToken cancellationToken = default)
     {
         var subasta = await _pujaRepository.ObtenerSubastaConPujasAsync(subastaId);
         if (subasta == null)
@@ -353,7 +358,7 @@ public class PujaService : IPujaService
             throw new NotFoundException($"No se encontró la subasta con ID {subastaId}.");
         }
 
-        var pujas = await _pujaRepository.ObtenerHistorialPorSubastaAsync(subastaId);
+        var pujas = await _pujaRepository.ObtenerHistorialPorSubastaAsync(subastaId, cancellationToken);
         return pujas.Select(p => new PujaHistorialResponse
         {
             PujaId = p.Id,
