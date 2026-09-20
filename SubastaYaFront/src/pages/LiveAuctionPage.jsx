@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { auctionService } from "@/services/auctionService";
 import { bidService } from "@/services/bidService";
@@ -7,7 +7,7 @@ import { LiveTimer } from "@/components/live/live-timer";
 import { BidHistory } from "@/components/live/bid-history";
 import { BiddingConsole } from "@/components/live/bidding-console";
 import { AuctionAlerts } from "@/components/live/auction-alerts";
-import { ArrowLeft, Tag, Radio, ShieldCheck } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 function LiveAuctionSkeleton() {
   return (
@@ -38,12 +38,24 @@ export function LiveAuctionPage({ user }) {
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alerts, setAlerts] = useState([]);
+  const bidsRef = useRef([]);
+
+  useEffect(() => {
+    bidsRef.current = bids;
+  }, [bids]);
 
   const addAlert = useCallback((alert) => {
-    setAlerts((prev) => [
-      ...prev,
-      { id: `${Date.now()}-${Math.random()}`, ...alert },
-    ]);
+    setAlerts((prev) => {
+      const isDuplicate = prev.some(
+        (existing) =>
+          existing.type === alert.type && existing.message === alert.message,
+      );
+      if (isDuplicate) return prev;
+      return [
+        ...prev,
+        { id: alert.id || `${Date.now()}-${Math.random()}`, ...alert },
+      ];
+    });
   }, []);
 
   useEffect(() => {
@@ -60,6 +72,7 @@ export function LiveAuctionPage({ user }) {
         if (!ignore) {
           setAuction(auctionData);
           setBids(bidsData);
+          bidsRef.current = bidsData;
         }
       } catch (err) {
         console.error("Error cargando sala en vivo:", err);
@@ -81,21 +94,25 @@ export function LiveAuctionPage({ user }) {
 
   const handleNewBid = useCallback(
     (newBid) => {
+      const previousLeader = bidsRef.current[0];
+      if (
+        user?.id &&
+        newBid.compradorId !== user.id &&
+        previousLeader &&
+        previousLeader.compradorId === user.id
+      ) {
+        addAlert({
+          type: "outbid",
+          message: `¡Te han superado! ${newBid.compradorSeudonimo || "Otro postor"} ofertó $${newBid.monto}.`,
+        });
+      }
+
       setBids((prev) => {
-        const previousLeader = prev[0];
-        if (
-          user?.id &&
-          newBid.compradorId !== user.id &&
-          previousLeader &&
-          previousLeader.compradorId === user.id
-        ) {
-          addAlert({
-            type: "outbid",
-            message: `¡Te han superado! ${newBid.compradorSeudonimo || "Otro postor"} ofertó $${newBid.monto}.`,
-          });
-        }
-        return [newBid, ...prev.filter((b) => b.pujaId !== newBid.pujaId)];
+        const next = [newBid, ...prev.filter((b) => b.pujaId !== newBid.pujaId)];
+        bidsRef.current = next;
+        return next;
       });
+
       setAuction((prev) => {
         if (!prev) return prev;
         const updated = {

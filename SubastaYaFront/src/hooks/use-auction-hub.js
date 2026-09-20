@@ -21,49 +21,64 @@ export function useAuctionHub(auctionId, callbacks = {}) {
   useEffect(() => {
     if (!auctionId) return
 
+    let isCancelled = false
     const connection = createAuctionHubConnection()
     connectionRef.current = connection
 
     connection.on('NewBid', (bid) => {
-      callbacksRef.current.onNewBid?.(bid)
+      if (!isCancelled) callbacksRef.current.onNewBid?.(bid)
     })
 
     connection.on('AuctionExtended', (data) => {
-      callbacksRef.current.onAuctionExtended?.(data)
+      if (!isCancelled) callbacksRef.current.onAuctionExtended?.(data)
     })
 
     connection.on('BidRejected', (data) => {
-      callbacksRef.current.onBidRejected?.(data)
+      if (!isCancelled) callbacksRef.current.onBidRejected?.(data)
     })
 
     connection.on('AuctionFinalized', (data) => {
-      callbacksRef.current.onAuctionFinalized?.(data)
+      if (!isCancelled) callbacksRef.current.onAuctionFinalized?.(data)
     })
 
     connection.on('AuctionDeserted', (data) => {
-      callbacksRef.current.onAuctionDeserted?.(data)
+      if (!isCancelled) callbacksRef.current.onAuctionDeserted?.(data)
     })
 
     connection.onreconnecting(() => {
-      setIsConnected(false)
+      if (!isCancelled) setIsConnected(false)
     })
 
     connection.onreconnected(async () => {
-      setIsConnected(true)
-      await connection.invoke('JoinAuction', Number(auctionId)).catch(() => {})
+      if (!isCancelled) {
+        setIsConnected(true)
+        await connection.invoke('JoinAuction', Number(auctionId)).catch(() => {})
+      }
     })
 
     connection
       .start()
       .then(async () => {
+        if (isCancelled) {
+          connection.stop()
+          return
+        }
         setIsConnected(true)
         await connection.invoke('JoinAuction', Number(auctionId))
       })
       .catch((err) => {
-        console.error('Error al conectar con AuctionHub:', err)
+        if (!isCancelled) {
+          console.error('Error al conectar con AuctionHub:', err)
+        }
       })
 
     return () => {
+      isCancelled = true
+      connection.off('NewBid')
+      connection.off('AuctionExtended')
+      connection.off('BidRejected')
+      connection.off('AuctionFinalized')
+      connection.off('AuctionDeserted')
       if (connection.state === 'Connected') {
         connection
           .invoke('LeaveAuction', Number(auctionId))
